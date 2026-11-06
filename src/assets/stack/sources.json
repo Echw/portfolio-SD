@@ -1,0 +1,128 @@
+[
+    {
+        "file":  "typescript.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/typescript/typescript-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "react.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/react/react-original.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "nextjs.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/nextjs/nextjs-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "astro.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/astro/astro-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "nodejs.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/nodejs/nodejs-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "graphql.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/graphql/graphql-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "trpc.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/trpc/trpc-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "postgresql.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/postgresql/postgresql-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "supabase.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/supabase/supabase-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "amazonwebservices.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/amazonwebservices/amazonwebservices-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "cloudflareworkers.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/cloudflareworkers/cloudflareworkers-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "docker.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/docker/docker-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "playwright.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/playwright/playwright-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "vitest.svg",
+        "source":  "https://raw.githubusercontent.com/devicons/devicon/32fe1d3b3f36ad11f90ab94f7db59738139c2bf6/icons/vitest/vitest-plain.svg",
+        "library":  "Devicon",
+        "license":  "LICENSE.devicon.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "mcp.svg",
+        "source":  "https://raw.githubusercontent.com/lobehub/lobe-icons/ea434b96e75813517b377825e01c0df61dee8836/packages/static-svg/icons/mcp.svg",
+        "library":  "Lobe Icons",
+        "license":  "LICENSE.lobe-icons.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "openai.svg",
+        "source":  "https://raw.githubusercontent.com/lobehub/lobe-icons/ea434b96e75813517b377825e01c0df61dee8836/packages/static-svg/icons/openai.svg",
+        "library":  "Lobe Icons",
+        "license":  "LICENSE.lobe-icons.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "anthropic.svg",
+        "source":  "https://raw.githubusercontent.com/lobehub/lobe-icons/ea434b96e75813517b377825e01c0df61dee8836/packages/static-svg/icons/anthropic.svg",
+        "library":  "Lobe Icons",
+        "license":  "LICENSE.lobe-icons.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    },
+    {
+        "file":  "rag.svg",
+        "source":  "https://raw.githubusercontent.com/lucide-icons/lucide/1a49fd88d85202bad69f39462241b309a484bba0/icons/database.svg",
+        "library":  "Lucide",
+        "license":  "LICENSE.lucide.txt",
+        "adaptations":  "Monochrome currentColor; 28px viewport; decorative accessibility attributes; title removed; paths and viewBox retained."
+    }
+]

@@ -1,0 +1,51 @@
+---
+import { Picture } from 'astro:assets';
+import { projects } from '../data/portfolio';
+---
+{projects.length > 0 && (
+  <section id="work" class="work container section" aria-labelledby="work-title" data-project-section data-project-count={projects.length}>
+    <div class="section-heading work-heading">
+      <h2 id="work-title" class="eyebrow">Independent work</h2>
+      <span class="work-count" aria-hidden="true">({String(projects.length).padStart(2, '0')})</span>
+    </div>
+    <div class="project-grid">
+      {projects.map((project, index) => (
+        <article class="project" data-project aria-labelledby={'title-' + project.id}>
+          <a class="project-card" data-project-card data-glow-card data-glow-tilt draggable="false" href={project.url} target="_blank" rel="noopener noreferrer" aria-label={'Visit ' + project.name + ' website (opens in a new tab)'}>
+            <div class="project-arrival" data-project-arrival>
+              <div class="project-entry" data-project-entry>
+                <div class="project-front glow-surface" data-project-surface data-glow-surface>
+                  <div class="card-title-row" data-project-title>
+                    <span class="card-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                    <h3 id={'title-' + project.id} class="project-title">{project.name}</h3>
+                  </div>
+                  <figure class="card-visual" style={'--image-position: ' + project.imagePosition}>
+                    <Picture src={project.image} formats={['avif']} fallbackFormat="webp" widths={[480, 720, 1080, 1440]} sizes="(min-width: 1680px) 650px, (min-width: 1024px) 38vw, (min-width: 900px) 40vw, 85vw" alt={project.imageAlt} loading="lazy" decoding="async" draggable="false" />
+                    <figcaption class="image-fallback" aria-hidden="true">{project.name}</figcaption>
+                  </figure>
+                  <div class="card-summary">
+                    <p class="project-description" data-project-copy>{project.description}</p>
+                  </div>
+                  <div class="project-scope" data-project-scope>
+                    <p class="scope-label">My contribution</p>
+                    <ul class="project-contributions" aria-label="My contribution">
+                      {project.contributions.map((contribution) => <li>{contribution}</li>)}
+                    </ul>
+                  </div>
+                  <div class="card-foot" data-project-action>
+                    <span class="card-visit">Visit website
+                      <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
+                        <path d="M4 16 16 4M5 4h11v11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+                <div class="project-back" aria-hidden="true"></div>
+              </div>
+            </div>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+)}

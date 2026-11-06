@@ -1,0 +1,21 @@
+---
+import { experience } from '../data/portfolio';
+---
+<section id="experience" class="experience container section" aria-labelledby="experience-title">
+  <div class="section-heading">
+    <h2 id="experience-title" class="section-title" data-reveal>Worked with.</h2>
+    <span class="section-count" aria-hidden="true">({String(experience.length).padStart(2, '0')})</span>
+  </div>
+  <ol class="experience-list" aria-label="Professional experience">
+    {experience.map((item) => (
+      <li class="experience-row" data-experience-row>
+        <h3 class="experience-company">{item.company}</h3>
+        <div class="experience-detail">
+          <p class="experience-role">{item.role}</p>
+          {item.summary && <p class="experience-summary">{item.summary}</p>}
+        </div>
+        <p class="experience-period">{item.period}</p>
+      </li>
+    ))}
+  </ol>
+</section>

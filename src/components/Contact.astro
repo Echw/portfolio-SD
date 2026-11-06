@@ -1,0 +1,31 @@
+---
+import { profile } from '../data/portfolio';
+const navigation = [
+  { label: 'Work', href: '#work' },
+  { label: 'Experience', href: '#experience' },
+  { label: 'About', href: '#about' },
+  { label: 'Stack', href: '#stack' },
+];
+---
+<footer id="contact" class="contact container section" aria-labelledby="contact-title">
+  <p class="eyebrow" data-footer-part>Have something in mind?</p>
+  <h2 id="contact-title" class="contact-title">
+    <span class="footer-line"><span data-footer-word>Let’s</span> <span data-footer-word>build</span></span>
+    <span class="footer-line footer-line--accent"><span data-footer-word>something</span> <span data-footer-word>useful.</span></span>
+  </h2>
+  <div class="footer-columns" data-footer-part>
+    <nav aria-label="Footer navigation">
+      <h3 class="eyebrow">Explore</h3>
+      <ul>{navigation.map((item) => <li><a class="text-link" href={item.href}>{item.label}</a></li>)}</ul>
+    </nav>
+    <div class="footer-contact">
+      <h3 class="eyebrow">Say hello</h3>
+      <a class="footer-email text-link" href={'mailto:' + profile.email}>{profile.email}</a>
+      <p>Full-stack development.<br />AI integrations &amp; developer tools.</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© {new Date().getFullYear()} {profile.name}</p>
+    <a class="text-link arrow-link" href="#top">Back to top <span aria-hidden="true">↑</span></a>
+  </div>
+</footer>

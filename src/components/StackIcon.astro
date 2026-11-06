@@ -1,0 +1,7 @@
+---
+import type { StackTool } from '../data/portfolio';
+import { stackIcons } from '../data/stack-icons';
+interface Props { tool: StackTool }
+const { tool } = Astro.props;
+---
+<span class="stack-icon" aria-hidden="true" set:html={stackIcons[tool]} />
