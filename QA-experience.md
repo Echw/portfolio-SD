@@ -35,4 +35,4 @@ Verified locally through Playwright in **headless Chromium 156.0.8078.4**. Viewp
 
 `npm.cmd run build` passed (9 pages); `npm.cmd run check` passed (0 errors, warnings or hints); `npm.cmd test` passed (**81 tests**); `npm.cmd run test:projects` passed and restored the two-project production build. Final checks followed the last CSS adjustment. `git diff --check` passed.
 
-Screenshots and observed results are in `output/experience-qa/`, including `functional-results.json`, `viewport-results.json` and `reveal-results.json`. External URLs/attributes were checked against the supplied source and generated HTML; remote products were not exercised. The Playwright contexts and task preview server were closed after QA. No deployment was performed.
+External URLs/attributes were checked against the supplied source and generated HTML; remote products were not exercised. The Playwright contexts and task preview server were closed after QA. No deployment was performed.

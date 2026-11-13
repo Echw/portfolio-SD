@@ -23,7 +23,7 @@ The two public-site captures were taken in Chromium after fonts/images loaded; t
 
 ## Results
 
-Verified in local headless Chromium 151.0.7922.34 through Playwright. Screenshots are saved in `output/sanna-qa/`; navigation and history observations are in `functional-results.json` there. Firefox, Safari/WebKit and physical phones were not tested in this task.
+Verified in local headless Chromium 151.0.7922.34 through Playwright. Firefox, Safari/WebKit and physical phones were not tested in this task.
 
 - Both heroes visually inspected at 1440×1000 and 390×844; Sanna additionally at 320×740 and 768×1024. The two-line title fits without horizontal overflow. Cover ratios are 2:1 on desktop/tablet and 4:3 on mobile; Sanna uses 55%, Goldnat retains 75%.
 - All four Sanna chapters, contribution, technologies, end links and shared footer inspected. Existing reveal animations expose the text during scrolling. No blank illustration frames, invented UI, lightboxes or enlargement links were added.
@@ -39,4 +39,4 @@ Validation: `npm.cmd run build`, `npm.cmd run check` (0 errors, warnings or hint
 
 ## Illustration follow-up
 
-After adding all three assets, the production build and type check were repeated. The existing figure/asset regression test now covers both case studies (71 tests total). All three Sanna images loaded in Chromium at 1440×1000 and 390×844, retaining their source proportions without horizontal overflow or enlargement links. Captions remain readable on mobile; fine labels within the full desktop screenshots, especially Sanity, are small at phone width. No crop or artificial UI was introduced. Evidence: `output/sanna-qa/illustration-*.png` and `public-screen-desktop-*.png`.
+After adding all three assets, the production build and type check were repeated. The existing figure/asset regression test now covers both case studies (71 tests total). All three Sanna images loaded in Chromium at 1440×1000 and 390×844, retaining their source proportions without horizontal overflow or enlargement links. Captions remain readable on mobile; fine labels within the full desktop screenshots, especially Sanity, are small at phone width. No crop or artificial UI was introduced.

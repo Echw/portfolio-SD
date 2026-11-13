@@ -63,7 +63,7 @@ zaznaczenia / kopiowania tekstu. Te przypadki, media queries oraz płynność wy
 w przeglądarce; testy adapterów nie uruchamiają jej silnika.
 Nieruchomość warstwy, kontrast linii pod rzeczywistą typografią i płynność nowego tła również
 pozostają niezweryfikowane w silniku przeglądarki. Próba CUA w tej rundzie ponownie zwróciła brak hosta.
-W tej rundzie obejrzano raster samych lokalnych ikon, zapisany w ../output/portfolio-qa/stack-icons.png.
+W tej rundzie obejrzano raster samych lokalnych ikon.
 To kontrola znaków przy 28 px, a nie screenshot HTML/CSS. Rzeczywiste wyrównanie przy
 360/768/1024/1536 px i na hover pozostaje do kontroli w przeglądarce; ponowna próba CUA zwróciła brak hosta.
 Nie obejrzano pierwszych sekund revealu ani pełnej pętli typewritera; zgodność wizualna
