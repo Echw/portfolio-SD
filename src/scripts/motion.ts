@@ -10,11 +10,16 @@ import { initializeBackdrop } from './backdrop';
 
 let teardown: (() => void) | undefined;
 let initializedOnce = false;
+let activeScroll: ReturnType<typeof initializeScroll> | undefined;
+
+export const destroyPortfolio = () => { teardown?.(); teardown = undefined; };
+export const pausePortfolioScroll = () => activeScroll?.pause();
+export const resumePortfolioScroll = () => activeScroll?.resume();
 
 /** Readable HTML is the baseline; every enhancement is scoped and reversible. */
-export async function initializePortfolio(): Promise<void> {
+export async function initializePortfolio(options: { restoreHash?: boolean } = {}): Promise<void> {
   teardown?.();
-  const restoreInitialHash = !initializedOnce;
+  const restoreInitialHash = options.restoreHash ?? !initializedOnce;
   initializedOnce = true;
   gsap.registerPlugin(ScrollTrigger);
   const root = document.querySelector<HTMLElement>('main');
@@ -42,13 +47,14 @@ export async function initializePortfolio(): Promise<void> {
     disposeProjectLayout?.();
     media.revert();
     scroll?.destroy();
+    if (activeScroll === scroll) activeScroll = undefined;
     scroll = undefined;
     window.removeEventListener('scroll', updateHeader);
     root.removeEventListener('error', imageError, true);
   };
 
   try {
-    // Paint the field before font loading; the incoming snapshot needs a complete background.
+    // Paint the field before font loading so the new page is ready behind the curtain.
     media.add({
       normal: '(prefers-reduced-motion: no-preference)',
       fine: '(hover: hover) and (pointer: fine)',
@@ -70,9 +76,11 @@ export async function initializePortfolio(): Promise<void> {
       const dispose: (() => void)[] = [];
       const scopedScroll = initializeScroll(header, normal);
       scroll = scopedScroll;
+      activeScroll = scopedScroll;
       dispose.push(() => {
         scopedScroll.destroy();
         if (scroll === scopedScroll) scroll = undefined;
+        if (activeScroll === scopedScroll) activeScroll = undefined;
       });
       if (normal) {
         const hero = root.querySelector<HTMLElement>('[data-hero]');
@@ -118,14 +126,15 @@ export async function initializePortfolio(): Promise<void> {
       return () => dispose.reverse().forEach((cleanup) => cleanup());
     });
 
-    requestAnimationFrame(() => {
-      if (disposed) return;
+    await new Promise<void>((resolve) => requestAnimationFrame(() => {
+      if (disposed) { resolve(); return; }
       ScrollTrigger.refresh();
       if (restoreInitialHash && location.hash) {
         const target = document.getElementById(location.hash.slice(1));
         if (target) scroll?.goTo(target, true);
       }
-    });
+      resolve();
+    }));
   } catch (error) {
     teardown();
     console.error('Motion unavailable; the static portfolio remains readable.', error);

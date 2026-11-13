@@ -11,7 +11,28 @@
 - Po uwadze użytkownika zmieniono przejście ze wspólnego obrazu na przesłonę.
   Ponowiono build oraz testy dokumentów po tej zmianie.
 
-## Aktualizacja przejścia i kontrola wizualna
+## Przejście GSAP + Astro ClientRouter — aktualna implementacja
+
+Build zakończony poprawnie; Astro check: 50 plików, 0 błędów/ostrzeżeń/wskazówek.
+Pełny zestaw testów: 66/66. `git diff --check`: bez błędów whitespace.
+
+Przesłona jest teraz trwałą warstwą HTML animowaną przez GSAP. Nie wymaga `pageswap`,
+`pagereveal` ani natywnych View Transitions. Router używa `fallback="swap"`, a jego
+natywna animacja jest pomijana również w przeglądarkach, które ją obsługują.
+Zachowano 550 / 600 / 550 ms, CustomEase oraz nazwy Goldnat, Homepage i sekcji.
+Wolne pobieranie wydłuża pełne zakrycie; limit 10 sekund uruchamia standardową nawigację.
+
+Nowe testy sprawdzają brak natywnego API, oba porządki zakończenia pobierania i zasłaniania,
+gotowość nowej strony, nazwy, reduced motion, anulowanie, resize, błędy i timeout,
+zwalnianie blokad, pojedynczą inicjalizację routera i zachowanie historii kotwic.
+Sprawdzenie DOM obejmuje trwałość przesłony i statyczną czytelność treści.
+
+Kontrola wizualna aktualnej wersji nie została wykonana: narzędzie CUA zatrzymało
+dostęp do Firefoxa komunikatem o braku obsługi egzekwowania polityki URL dla tej
+przeglądarki na Windows. Firefox, Chromium, WebKit/Safari oraz mobile pozostają
+wizualnie niezweryfikowane dla tej wersji. Testy jednostkowe nie są testami silników przeglądarek.
+
+## Poprzednie przejście natywne — historia kontroli wizualnej
 
 Przejście zastąpiono jednym jednolitym panelem: 550 ms rozciągania od lewej,
 600 ms pełnego zakrycia, 550 ms zjazdu w prawo. Pod zakryciem osobny snapshot nazwy

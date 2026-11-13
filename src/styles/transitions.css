@@ -1,97 +1,37 @@
-/* One opaque panel: expand from the left, switch pages under full cover,
- * then slide to the right. No canvas copies, curved masks, or page crossfade.
- */
-@view-transition { navigation: auto; }
-
-.route-curtain {
+/* The live HTML curtain works independently of native View Transitions. */
+.route-overlay {
   position: fixed;
   inset: 0;
-  /* Always painted beneath the page. Never reveal a live overlay before capture. */
-  z-index: -1;
+  z-index: 2000;
+  visibility: hidden;
   pointer-events: none;
-  background: var(--bg, #0a0a0a);
-  view-transition-name: route-curtain;
+  isolation: isolate;
 }
-
-.route-label {
-  position: fixed;
+.route-overlay[data-active] { visibility: visible; pointer-events: auto; }
+.route-curtain {
+  position: absolute;
   inset: 0;
-  /* The opaque live curtain hides the label, including before/after snapshots. */
-  z-index: -2;
+  background: var(--bg, #0a0a0a);
+  border-inline: 1px solid rgb(132 112 96 / 55%);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.route-label {
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
   padding: 24px;
-  pointer-events: none;
+  opacity: 0;
   color: var(--ink, #f5f0eb);
   font: 500 clamp(32px, 4vw, 64px)/1.1 var(--font-display, 'Archivo Variable', Arial, sans-serif);
   letter-spacing: -.03em;
   text-align: center;
-  view-transition-name: route-label;
 }
-
-/* Without the enhancement, native navigation has no decorative delay. */
-::view-transition-group(root) { animation: none; }
+/* Astro owns navigation, but never supplies a second visual transition. */
+::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 ::view-transition-old(root) { display: none; }
-::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-
-.route-transitions::view-transition { background: var(--bg, #0a0a0a); }
-.route-transitions::view-transition-group(root) { z-index: 0; }
-.route-transitions::view-transition-old(root) {
-  display: block;
-  mix-blend-mode: normal;
-  animation: route-old 850ms step-end both;
-}
-.route-transitions::view-transition-new(root) {
-  animation: route-new 850ms step-end both;
-}
-::view-transition-group(route-curtain) { display: none; z-index: 1; animation: none; }
-.route-transitions::view-transition-group(route-curtain) { display: block; }
-::view-transition-old(route-curtain) {
-  box-sizing: border-box;
-  height: 100%;
-  border-inline: 1px solid rgb(132 112 96 / 55%);
-  mix-blend-mode: normal;
-  transform-origin: left center;
-  animation: route-curtain 1700ms linear both;
-}
-::view-transition-new(route-curtain) { display: none; }
-
-::view-transition-group(route-label) { display: none; z-index: 2; animation: none; }
-.route-transitions::view-transition-group(route-label) { display: block; }
-/* Always use the destination's label, including browser Back/Forward. */
-::view-transition-old(route-label) { display: none; }
-::view-transition-new(route-label) {
-  height: 100%;
-  mix-blend-mode: normal;
-  animation: route-label 600ms cubic-bezier(.65, 0, .35, 1) 550ms both;
-}
-
-@keyframes route-old { from { opacity: 1; } to { opacity: 0; } }
-@keyframes route-new { from { opacity: 0; } to { opacity: 1; } }
-@keyframes route-curtain {
-  0% {
-    transform: translateX(0) scaleX(0);
-    animation-timing-function: cubic-bezier(.65, 0, .35, 1);
-  }
-  /* 550 ms cover, 600 ms title interlude, then 550 ms reveal. */
-  32.352941% { transform: translateX(0) scaleX(1); }
-  67.647059% {
-    transform: translateX(0) scaleX(1);
-    animation-timing-function: cubic-bezier(.65, 0, .35, 1);
-  }
-  100% { transform: translateX(100%) scaleX(1); }
-}
-
-@keyframes route-label {
-  0% { opacity: 0; transform: translateY(8px); }
-  25%, 75% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-8px); }
-}
-
+::view-transition-new(root) { mix-blend-mode: normal; }
 @media (prefers-reduced-motion: reduce) {
-  @view-transition { navigation: none; }
-  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  .route-overlay { visibility: hidden !important; pointer-events: none !important; }
 }
-
-
-

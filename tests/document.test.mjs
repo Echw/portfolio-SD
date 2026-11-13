@@ -13,7 +13,8 @@ test('each destination supplies its own decorative default transition label', ()
     const labels = [...page.matchAll(/<div\b[^>]*data-route-label\b[^>]*>([^<]*)<\/div>/g)];
     assert.equal(labels.length, 1);
     assert.equal(labels[0][1], label);
-    assert.match(labels[0][0], /aria-hidden="true"/);
+    assert.match(page, /<div\b[^>]*data-route-overlay\b[^>]*aria-hidden="true"/);
+    assert.ok(page.includes(`name="portfolio-transition-label" content="${label}"`));
     assert.doesNotMatch(labels[0][0], /tabindex/);
   }
 });
@@ -108,12 +109,15 @@ test('all built image variants and local stylesheet/script assets exist', () => 
 
 test('SEO and baseline accessibility are available in the generated HTML', () => {
   const transitionStyle = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)]
-    .find((match) => match[1].includes('@view-transition'));
-  assert.ok(transitionStyle, 'Cross-document opt-in is inline before first paint');
-  assert.notEqual(transitionStyle[1].charCodeAt(0), 0xfeff, 'A BOM in inline CSS invalidates the first at-rule');
+    .find((match) => match[1].includes('.route-overlay'));
+  assert.ok(transitionStyle, 'Idle curtain styles are inline before first paint');
+  assert.notEqual(transitionStyle[1].charCodeAt(0), 0xfeff);
+  assert.doesNotMatch(transitionStyle[1], /@view-transition|view-transition-name/);
+  assert.match(html, /name="astro-view-transitions-fallback" content="swap"/);
+  assert.match(html, /data-astro-transition-persist="route-overlay"/);
   assert.equal([...html.matchAll(/<canvas\b[^>]*\bdata-backdrop\b/g)].length, 1);
   assert.match(html, /<body\b[^>]*>\s*<canvas[^>]*data-backdrop aria-hidden="true"><\/canvas>/);
-  assert.match(html, /<html lang="en"/);
+  assert.match(html, /<html\b[^>]*\blang="en"/);
   assert.match(html, /<meta name="description" content="[^"]+"/);
   assert.match(html, /<meta property="og:image"/);
   assert.match(html, /application\/ld\+json/);

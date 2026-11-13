@@ -9,10 +9,18 @@ const source = ts.transpileModule(readFileSync(new URL('../src/scripts/scroll.ts
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
 
-function harness() {
+function harness({ router = false } = {}) {
   const windowEvents = new Map(), documentEvents = new Map(), classes = new Set(), jobs = new Map();
   const events = (listeners) => ({ addEventListener: (name, callback) => listeners.set(name, callback), removeEventListener: (name) => listeners.delete(name) });
-  const calls = []; let lenis;
+  const calls = [], navigations = [], historyWrites = []; let lenis;
+  const location = { hash: '' };
+  const history = { state: { index: 7, scrollY: 250 }, pushState(...args) { historyWrites.push(args); } };
+  const target = { getBoundingClientRect: () => ({ top: 600 }), hasAttribute: () => true, focus() {}, addEventListener() {} };
+  class Element {
+    closest() { return this; }
+    getAttribute() { return '#about'; }
+  }
+  const link = new Element();
   class Lenis {
     actualScroll = 250; stops = 0; starts = 0; stopped = false; failScroll = false;
     constructor() { lenis = this; }
@@ -31,22 +39,53 @@ function harness() {
     clearTimeout: (key) => jobs.delete(key), scrollTo() {},
   };
   const document = { ...events(documentEvents), hidden: false,
+    querySelector: () => router ? {} : null, getElementById: () => target,
     documentElement: { classList: { add: (value) => classes.add(value), remove: (value) => classes.delete(value) } },
   };
   const exports = {};
   runInNewContext(source, {
-    exports, window, document,
+    exports, window, document, Element, location, history,
     require(name) {
       if (name === 'lenis') return { __esModule: true, default: Lenis };
       if (name === 'gsap') return { gsap: { ticker: { lagSmoothing() {}, add() {}, remove() {} } } };
       if (name === 'gsap/ScrollTrigger') return { ScrollTrigger: { update() {} } };
       if (name === './scroll-hold') return { createScrollHold };
+      if (name === 'astro:transitions/client') return { navigate(hash, options) {
+        navigations.push({ hash, options }); location.hash = hash; return Promise.resolve();
+      } };
       return {};
     },
   });
   const scroll = exports.initializeScroll({ offsetHeight: 112 }, true);
-  return { scroll, lenis, calls, classes, jobs, windowEvents, documentEvents, document };
+  return { scroll, lenis, calls, classes, jobs, windowEvents, documentEvents, document, navigations, historyWrites, history, link };
 }
+
+test('local anchors use Astro history once and retain smooth scrolling without a document transition', async () => {
+  const h = harness({ router: true }); let prevented = 0;
+  h.documentEvents.get('click')({ target: h.link, button: 0, detail: 1, preventDefault: () => prevented++ });
+  await Promise.resolve();
+  assert.equal(prevented, 1);
+  assert.equal(h.navigations.length, 1);
+  assert.equal(h.navigations[0].hash, '#about');
+  assert.equal(h.historyWrites.length, 0);
+  assert.equal(h.history.state.index, 7);
+  assert.equal(h.calls.at(-1).options.immediate, false);
+  for (const extra of [{ defaultPrevented: true }, { ctrlKey: true }, { metaKey: true }, { button: 1 }]) {
+    h.documentEvents.get('click')({ target: h.link, button: 0, ...extra, preventDefault() { throw Error('Must remain native'); } });
+  }
+  assert.equal(h.navigations.length, 1); h.scroll.destroy();
+});
+
+test('navigation pause settles card holds and resumes exactly the current scroll owner', () => {
+  const h = harness(); let settled = 0;
+  h.scroll.hold(() => settled++);
+  h.scroll.pause();
+  assert.equal(settled, 1); assert.equal(h.lenis.stopped, true);
+  assert.equal(h.classes.size, 0);
+  h.scroll.resume(); assert.equal(h.lenis.stopped, false);
+  h.scroll.destroy(); const starts = h.lenis.starts;
+  h.scroll.resume(); assert.equal(h.lenis.starts, starts);
+});
 
 test('the real owner stops Lenis, discards wheel/keyboard input, frames once and resumes after the final holder', () => {
   const h = harness();

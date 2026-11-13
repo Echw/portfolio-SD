@@ -2,6 +2,7 @@
 import '@fontsource-variable/archivo';
 import '@fontsource-variable/archivo/standard-italic.css';
 import '@fontsource-variable/inter';
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import transitionStyles from '../styles/transitions.css?raw';
 import Header from '../components/Header.astro';
@@ -9,7 +10,6 @@ import Contact from '../components/Contact.astro';
 import Backdrop from '../components/Backdrop.astro';
 import { profile } from '../data/portfolio';
 import entryBootstrap from '../scripts/entry-bootstrap.js?raw';
-import routeTransition from '../scripts/route-transition.js?raw';
 
 interface Props {
   title: string;
@@ -21,15 +21,16 @@ interface Props {
 const { title, description, home = false, transitionLabel = 'Homepage', schema } = Astro.props;
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0a0a0a" />
-    <!-- Cross-document opt-in must exist before first paint, including in Vite dev. -->
+    <ClientRouter fallback="swap" />
+    <!-- Keep the idle overlay hidden before the first paint, including in dev. -->
     <style is:inline set:html={transitionStyles} />
-    <script is:inline set:html={routeTransition} />
+    <meta name="portfolio-transition-label" content={transitionLabel} />
     {home && <script is:inline set:html={entryBootstrap} />}
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -43,8 +44,10 @@ const { title, description, home = false, transitionLabel = 'Homepage', schema }
   </head>
   <body data-page={home ? 'home' : 'case-study'}>
     <Backdrop />
-    <div class="route-curtain" data-route-curtain aria-hidden="true"></div>
-    <div class="route-label" data-route-label={transitionLabel} aria-hidden="true">{transitionLabel}</div>
+    <div class="route-overlay" data-route-overlay aria-hidden="true" transition:persist="route-overlay">
+      <div class="route-curtain" data-route-curtain></div>
+      <div class="route-label" data-route-label>{transitionLabel}</div>
+    </div>
     {home && <div class="entry-curtain" data-entry-curtain aria-hidden="true"></div>}
     <div class="cursor-layer" data-cursor-layer aria-hidden="true" hidden>
       <div class="cursor-dot" data-cursor-dot><span></span></div>
@@ -56,8 +59,8 @@ const { title, description, home = false, transitionLabel = 'Homepage', schema }
       <Contact home={home} />
     </main>
     <script>
-      import { initializePortfolio } from '../scripts/motion';
-      initializePortfolio();
+      import { initializeRouteTransitions } from '../scripts/route-transition';
+      initializeRouteTransitions();
     </script>
   </body>
 </html>

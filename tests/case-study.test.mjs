@@ -21,7 +21,7 @@ test('Goldnat ships the real copy and correctly distinguishes the live website f
 
 test('the standalone case study has accessible navigation, metadata and no homepage intro', () => {
   assert.match(html, /<title>Goldnat/);
-  assert.match(html, /<html lang="en"/);
+  assert.match(html, /<html\b[^>]*\blang="en"/);
   assert.equal([...html.matchAll(/<h1\b/g)].length, 1);
   assert.match(html, /<h1 id="case-title">Goldnat<\/h1>/);
   assert.doesNotMatch(html, /data-entry-curtain|entry-pending|data-hero-slide|data-project-entry/);

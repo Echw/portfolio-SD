@@ -2,101 +2,187 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
+import ts from 'typescript';
 
-const source = readFileSync(new URL('../src/scripts/route-transition.js', import.meta.url), 'utf8');
-function harness({ supported = true, reduced = false, panel = true, page = 'home', hash = '', title = 'Homepage' } = {}) {
-  const window = new EventTarget();
-  if (supported) Object.assign(window, { onpageswap: null, onpagereveal: null });
-  const classes = new Set(), rootClasses = new Set();
-  const root = { dataset: {}, classList: { add: (name) => rootClasses.add(name) } };
-  const element = { classList: { add: (name) => classes.add(name), remove: (name) => classes.delete(name) } };
-  const label = { dataset: { routeLabel: title }, textContent: title };
-  const location = { hash };
-  window.location = location;
+const source = ts.transpileModule(readFileSync(new URL('../src/scripts/route-transition.ts', import.meta.url), 'utf8')
+  .replace(/^if \(import\.meta\.hot\).*$/m, ''), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+}).outputText;
+const deferred = () => {
+  let resolve, reject;
+  const promise = new Promise((yes, no) => { resolve = yes; reject = no; });
+  return { promise, resolve, reject };
+};
+const flush = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
+
+function harness({ reduced = false, initialize = () => Promise.resolve() } = {}) {
+  const window = new EventTarget(), document = new EventTarget();
   const media = Object.assign(new EventTarget(), { matches: reduced });
-  let introFinished = 0, arrivals = 0;
-  window.__portfolioEntry = { finish: () => introFinished++ };
-  window.addEventListener('portfolio:route-arrive', () => arrivals++);
-  runInNewContext(source, {
-    window, Event, document: {
-      documentElement: root, body: { dataset: { page } },
-      querySelector: (selector) => selector === '[data-route-label]' ? label : panel ? element : null,
-    },
-    matchMedia: () => media,
+  const timers = new Map(), timelines = [], initializations = [], redirects = [], calls = [];
+  let timer = 0;
+  const element = () => ({ dataset: {}, style: {}, inert: false,
+    setAttribute(name, value) { this[name] = value; }, removeAttribute(name) { delete this[name]; },
+    focus() { calls.push('focus'); },
   });
-  const emit = (name, transition) => window.dispatchEvent(Object.assign(new Event(name), { viewTransition: transition }));
-  return { classes, rootClasses, root, media, emit, label, location, introFinished: () => introFinished, arrivals: () => arrivals };
-}
-function transition() {
-  let resolve, reject, skipped = 0;
-  const finished = new Promise((yes, no) => { resolve = yes; reject = no; });
-  return { ready: Promise.resolve(), finished, resolve, reject, skipTransition: () => skipped++, skipped: () => skipped };
-}
-
-test('homepage arrival labels follow the destination, including restored pages and the site-name link', () => {
-  const h = harness();
-  for (const [hash, expected] of [
-    ['#work', 'All projects'], ['#top', 'Homepage'],
-    ['#about', 'About'], ['#stack', 'Stack'], ['#experience', 'Experience'],
-    ['#contact', 'Contact'], ['', 'Homepage'], ['#unknown', 'Homepage'],
-  ]) {
-    h.location.hash = hash;
-    h.emit('pagereveal', transition());
-    assert.equal(h.label.textContent, expected);
+  const overlay = element(), panel = element(), label = element(), main = element(), header = element();
+  overlay.querySelector = (selector) => selector.includes('curtain') ? panel : label;
+  document.documentElement = element(); document.body = { dataset: { page: 'home' } }; document.hidden = false;
+  document.querySelector = (selector) => selector === 'main' ? main : overlay;
+  document.querySelectorAll = () => [main, header];
+  window.setTimeout = (fn, delay) => { timers.set(++timer, { fn, delay }); return timer; };
+  window.clearTimeout = (id) => timers.delete(id);
+  window.__portfolioEntry = { finish() { calls.push('intro-finish'); } };
+  const gsap = {
+    registerPlugin() {},
+    set(target, properties) { Object.assign(target.style, properties); calls.push(['set', target, properties]); },
+    timeline() {
+      const timeline = { steps: [], killed: false,
+        eventCallback(_, fn) { this.complete = fn; },
+        to(target, properties, position) { this.steps.push({ target, properties, position }); return this; },
+        play() { return this; }, kill() { this.killed = true; },
+        finish() { this.complete(); },
+      };
+      timelines.push(timeline); return timeline;
+    },
+  };
+  const motion = {
+    initializePortfolio(options) { initializations.push(options); return initialize(); },
+    destroyPortfolio() { calls.push('destroy'); }, pausePortfolioScroll() { calls.push('pause'); },
+    resumePortfolioScroll() { calls.push('resume'); },
+  };
+  const exports = {};
+  runInNewContext(source, {
+    exports, window, document, Event, console: { ...console, warn() {} }, matchMedia: () => media,
+    location: { assign: (url) => redirects.push(['assign', url]), replace: (url) => redirects.push(['replace', url]) },
+    require(name) {
+      if (name === 'gsap') return { gsap };
+      if (name === 'gsap/CustomEase') return { CustomEase: { create: () => 'route-panel' } };
+      if (name === './motion') return motion;
+      throw Error(name);
+    },
+  });
+  const dispose = exports.initializeRouteTransitions();
+  const emit = (name) => document.dispatchEvent(new Event(name));
+  function prepare({ to = '/work/goldnat/', page = 'case-study', title = 'Goldnat', type = 'push', loader = async () => {} } = {}) {
+    const controller = new AbortController();
+    const newDocument = { documentElement: element(), body: { dataset: { page } },
+      querySelector: () => ({ getAttribute: () => title }),
+    };
+    const event = Object.assign(new Event('astro:before-preparation', { cancelable: true }), {
+      from: new URL(page === 'home' ? 'https://portfolio.test/work/goldnat/' : 'https://portfolio.test/'),
+      to: new URL(to, 'https://portfolio.test'), newDocument, signal: controller.signal,
+      navigationType: type, loader,
+    });
+    document.dispatchEvent(event);
+    const loading = event.loader();
+    return { event, controller, loading, swap() {
+      const viewTransition = { ready: Promise.reject(Error('No native snapshots')), skipTransition() { calls.push('skip-native'); } };
+      document.dispatchEvent(Object.assign(new Event('astro:before-swap'), {
+        ...Object.fromEntries(['from', 'to', 'newDocument', 'signal'].map((key) => [key, event[key]])), viewTransition,
+      }));
+      document.documentElement.dataset = { ...newDocument.documentElement.dataset };
+      emit('astro:after-swap'); emit('astro:page-load');
+    } };
   }
-});
+  return { ...exports, dispose, prepare, emit, window, document, media, timers, timelines, initializations, redirects, calls, overlay, panel, label, main };
+}
 
-test('case studies keep their project label when navigating to a section', () => {
-  const h = harness({ page: 'case-study', hash: '#contact', title: 'Goldnat' });
-  h.emit('pagereveal', transition());
+test('a browser without native view-transition APIs gets cover, destination title and reveal', async () => {
+  const h = harness(), loading = deferred();
+  const navigation = h.prepare({ loader: () => loading.promise });
+  assert.equal(h.overlay['data-active'], '');
+  assert.equal(h.panel.style.scaleX, 0, 'The panel is collapsed before it becomes visible');
+  assert.equal(h.main.inert, true);
+  let prepared = false; navigation.loading.then(() => { prepared = true; });
+  h.timelines[0].finish(); await flush();
+  assert.equal(prepared, false, 'Slow loading stays covered');
+  loading.resolve(); await navigation.loading;
+  navigation.swap(); await flush();
   assert.equal(h.label.textContent, 'Goldnat');
+  assert.equal(h.overlay.dataset.phase, 'title');
+  h.timelines[1].finish(); await flush();
+  assert.equal(h.overlay.dataset.phase, 'reveal');
+  h.timelines[2].finish(); await flush();
+  assert.equal(h.overlay['data-active'], undefined);
+  assert.equal(h.main.inert, false);
+  assert.equal(h.document.documentElement.dataset.routeBusy, undefined);
+  assert.equal(h.timers.size, 0);
+  assert.ok(h.calls.includes('skip-native'));
+  h.dispose();
 });
 
-test('unsupported, reduced motion, missing panel and ordinary navigation never expose a curtain', () => {
-  for (const options of [{ supported: false }, { reduced: true }, { panel: false }]) {
-    const h = harness(options), t = transition();
-    h.emit('pageswap', t);
-    assert.equal(h.classes.size, 0);
-    if (options.supported !== false) assert.equal(t.skipped(), 1);
+test('fast loading cannot swap early; reveal waits for the incoming motion initialization', async () => {
+  const ready = deferred(), h = harness({ initialize: () => ready.promise });
+  const navigation = h.prepare();
+  let prepared = false; navigation.loading.then(() => { prepared = true; });
+  await flush(); assert.equal(prepared, false);
+  h.timelines[0].finish(); await navigation.loading;
+  navigation.swap(); h.timelines[1].finish(); await flush();
+  assert.equal(h.timelines.length, 2);
+  ready.resolve(); await flush();
+  assert.equal(h.timelines.length, 3);
+  h.timelines[2].finish(); await flush(); h.dispose();
+});
+
+test('labels distinguish Homepage, work and section links while project labels ignore hashes', () => {
+  const h = harness();
+  for (const [hash, title] of [['#top', 'Homepage'], ['', 'Homepage'], ['#work', 'All projects'], ['#about', 'About'], ['#stack', 'Stack'], ['#experience', 'Experience'], ['#contact', 'Contact']]) {
+    assert.equal(h.routeLabel('home', hash, 'Homepage'), title);
   }
-  const h = harness(); h.emit('pageswap', null);
-  assert.equal(h.classes.size, 0);
+  assert.equal(h.routeLabel('case-study', '#contact', 'Goldnat'), 'Goldnat'); h.dispose();
 });
 
-test('snapshot capture never exposes a live overlay; completed transitions cannot be cancelled again', async () => {
-  for (const outcome of ['resolve', 'reject']) {
-    const h = harness(), t = transition();
-    h.emit('pageswap', t);
-    assert.equal(h.classes.size, 0, 'Do not flash the full-size panel on the outgoing page');
-    t[outcome]();
-    await Promise.resolve();
-    h.emit('pageshow'); h.emit('resize');
-    assert.equal(t.skipped(), 0);
-    assert.equal(h.classes.size, 0);
+test('reduced motion swaps without animation or delay and history does not reset scroll to the hash', async () => {
+  const h = harness({ reduced: true });
+  const navigation = h.prepare({ to: '/#work', page: 'home', title: 'Homepage', type: 'traverse' });
+  await navigation.loading; navigation.swap(); await flush();
+  assert.equal(h.timelines.length, 0);
+  assert.equal(h.initializations[0].restoreHash, false);
+  assert.equal(h.label.textContent, 'All projects');
+  assert.equal(h.main.inert, false);
+  assert.equal(h.overlay['data-active'], undefined); h.dispose();
+});
+
+test('aborted navigation cannot clear the next curtain, and listeners initialize only once', async () => {
+  const h = harness(); assert.equal(h.initializeRouteTransitions(), h.dispose);
+  const first = h.prepare(); first.controller.abort();
+  const second = h.prepare({ to: '/#top', page: 'home', title: 'Homepage' });
+  await first.loading; await flush();
+  assert.equal(h.overlay['data-active'], ''); assert.equal(h.main.inert, true);
+  assert.equal(h.timelines[0].killed, true);
+  h.timelines[1].finish(); await second.loading;
+  second.swap(); await flush();
+  assert.equal(h.label.textContent, 'Homepage'); h.dispose();
+  assert.equal(h.timers.size, 0); assert.equal(h.main.inert, false);
+});
+
+test('fetch failure and timeout release input and delegate preparation failure to Astro', async () => {
+  for (const timeout of [false, true]) {
+    const h = harness();
+    const navigation = h.prepare({ loader: timeout ? () => new Promise(() => {}) : async () => { throw Error('Offline'); } });
+    if (timeout) [...h.timers.values()][0].fn();
+    await navigation.loading;
+    assert.equal(navigation.event.defaultPrevented, true);
+    assert.equal(h.overlay['data-active'], undefined); assert.equal(h.main.inert, false);
+    assert.equal(h.timers.size, 0); h.dispose();
   }
 });
 
-test('arrival dismisses homepage intro; resize and a reduced-motion change cancel cleanly', () => {
-  const h = harness(), t = transition();
-  h.emit('pagereveal', t);
-  assert.equal(h.root.dataset.routeArrival, 'true');
-  assert.equal(h.introFinished(), 1);
-  assert.equal(h.arrivals(), 1);
-  h.emit('resize');
-  assert.equal(t.skipped(), 1);
-  const next = transition(); h.emit('pageswap', next);
-  h.media.matches = true; h.media.dispatchEvent(new Event('change'));
-  assert.equal(next.skipped(), 1);
-  assert.equal(h.classes.size, 0);
+test('a stalled incoming page falls back with replace after swap, without trapping the visitor', async () => {
+  const h = harness({ initialize: () => new Promise(() => {}) });
+  const navigation = h.prepare(); h.timelines[0].finish(); await navigation.loading;
+  navigation.swap(); [...h.timers.values()][0].fn(); await flush();
+  assert.deepEqual(h.redirects, [['replace', 'https://portfolio.test/work/goldnat/']]);
+  assert.equal(h.main.inert, false); assert.equal(h.overlay['data-active'], undefined); h.dispose();
 });
 
-test('an earlier transition finishing cannot remove cancellation handling for a newer transition', async () => {
-  const h = harness(), first = transition(), second = transition();
-  h.emit('pageswap', first); h.emit('pageswap', second);
-  first.resolve(); await Promise.resolve();
-  h.emit('resize');
-  assert.equal(first.skipped(), 0);
-  assert.equal(second.skipped(), 1);
-  second.resolve(); await Promise.resolve();
-  assert.equal(h.classes.size, 0);
+test('resize or reduced-motion changes settle cancelled animations and leave navigation usable', async () => {
+  for (const change of ['resize', 'reduce']) {
+    const h = harness(), navigation = h.prepare();
+    if (change === 'resize') h.window.dispatchEvent(new Event('resize'));
+    else { h.media.matches = true; h.media.dispatchEvent(new Event('change')); }
+    await navigation.loading; navigation.swap(); await flush();
+    assert.equal(h.timelines.length, 1);
+    assert.equal(h.main.inert, false); assert.equal(h.overlay['data-active'], undefined); h.dispose();
+  }
 });

@@ -3,6 +3,7 @@ import 'lenis/dist/lenis.css';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { createScrollHold } from './scroll-hold';
+import { navigate } from 'astro:transitions/client';
 
 /** Single scroll owner. Native keyboard/touch behavior remains available. */
 export function initializeScroll(header: HTMLElement, smooth: boolean) {
@@ -47,8 +48,17 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
     const target = hash ? document.getElementById(hash.slice(1)) : null;
     if (!target) return;
     event.preventDefault();
-    if (location.hash !== hash) history.pushState(null, '', hash);
-    goTo(target, event.detail === 0 || !smooth, true);
+    // Astro keeps its own history index and saved positions. Never replace them with null.
+    if (document.querySelector('meta[name="astro-view-transitions-enabled"]')) {
+      const top = window.scrollY;
+      const moving = navigate(hash!, { sourceElement: anchor! });
+      // The router updates the fragment synchronously; Lenis owns the visible movement.
+      window.scrollTo(0, top);
+      void moving.then(() => { if (!destroyed) goTo(target, event.detail === 0 || !smooth, true); });
+    } else {
+      if (location.hash !== hash) history.pushState(history.state, '', hash);
+      goTo(target, event.detail === 0 || !smooth, true);
+    }
   };
   const key = (event: KeyboardEvent) => {
     if (holds.active()) {
@@ -68,7 +78,7 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
   };
   const interrupt = () => holds.interrupt();
   const visibility = () => { if (document.hidden) interrupt(); };
-  document.addEventListener('click', click);
+  document.addEventListener('click', click, true);
   document.addEventListener('visibilitychange', visibility);
   window.addEventListener('keydown', key);
   window.addEventListener('wheel', preventScroll, { passive: false });
@@ -77,6 +87,8 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
   window.addEventListener('popstate', interrupt);
   return {
     goTo,
+    pause() { holds.interrupt(); lenis?.stop(); },
+    resume() { if (!destroyed && !holds.active()) lenis?.start(); },
     hold(finish: () => void, section?: HTMLElement | null) {
       const alreadyHeld = holds.active();
       const release = holds.acquire(finish);
@@ -94,7 +106,7 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
       if (destroyed) return;
       destroyed = true;
       holds.destroy();
-      document.removeEventListener('click', click);
+      document.removeEventListener('click', click, true);
       document.removeEventListener('visibilitychange', visibility);
       window.removeEventListener('keydown', key);
       window.removeEventListener('wheel', preventScroll);
