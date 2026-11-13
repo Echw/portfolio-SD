@@ -112,6 +112,8 @@
   .project-back { display: none; position: absolute; inset: 0; border: 1px solid var(--line); border-radius: 14px; background: #181513; transform: rotateY(180deg); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
   .project-entry.is-entering .project-back { display: block; }
   .project-entry.is-entering { will-change: transform; }
+  /* Keep positioned images and glow layers inside the face's backface culling in WebKit/Firefox. */
+  .project-front { isolation: isolate; }
   .glow-surface { --mouse-x: 0px; --mouse-y: 0px; --light: 0; }
   .glow-surface::after { content: ''; position: absolute; z-index: 3; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(var(--glow-size, 400px) circle at var(--mouse-x) var(--mouse-y), rgb(255 239 219 / 12%), transparent 70%); opacity: var(--light); }
   @supports (mask-composite: exclude) {
