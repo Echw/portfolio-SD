@@ -86,7 +86,7 @@ export async function initializePortfolio(): Promise<void> {
         });
         const words = Array.from(root.querySelectorAll<HTMLElement>('[data-about-word]'));
         if (words.length) {
-          gsap.fromTo(words, { color: '#a49b93', filter: 'blur(.65px)' }, {
+          gsap.fromTo(words, { color: '#4a4541', filter: 'blur(.65px)' }, {
             color: (index: number) => words[index].classList.contains('about-word--accent') ? '#ff5c28' : '#f5f0eb',
             filter: 'blur(0px)', duration: .3, stagger: .055, ease: 'none',
             scrollTrigger: { trigger: '[data-about-copy]', start: 'top 78%', end: 'bottom 40%', scrub: .45 },
