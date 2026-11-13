@@ -56,6 +56,7 @@ export function initializeBackdrop({ interactive, compact }: BackdropOptions): (
   };
   const fail = (error: unknown) => {
     cleanup();
+    canvas!.hidden = true;
     console.error('Interactive background unavailable; the plain background remains.', error);
   };
   function tick(_time: number, deltaMilliseconds: number) {
@@ -97,7 +98,8 @@ export function initializeBackdrop({ interactive, compact }: BackdropOptions): (
   const out = (event: PointerEvent) => { if (!event.relatedTarget) rest(); };
   const visibility = () => { if (document.hidden) rest(); };
   function cleanup() {
-    disposed = true; stop(); canvas!.hidden = true;
+    // Preserve the last rendered frame for navigation snapshots and BFCache.
+    disposed = true; stop();
     window.removeEventListener('resize', resize);
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerout', out);

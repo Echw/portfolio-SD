@@ -1,0 +1,15 @@
+---
+import { Picture } from 'astro:assets';
+import type { CaseStudyFigure } from '../data/case-studies';
+interface Props { figure: CaseStudyFigure; detail?: boolean }
+const { figure, detail = false } = Astro.props;
+const widths = [640, 960, 1440, 1840].filter((width) => width <= figure.image.width);
+---
+<figure class:list={['case-figure', { 'case-figure--detail': detail }]} data-reveal>
+  <div class="case-image">
+    <Picture src={figure.image} formats={['webp']} fallbackFormat="jpg" widths={widths} sizes={detail ? '(min-width: 1024px) 65vw, 90vw' : '(min-width: 1680px) 1512px, 90vw'} alt={figure.alt} loading="lazy" decoding="async" />
+  </div>
+  <figcaption>
+    <span>{figure.caption}</span>
+  </figcaption>
+</figure>

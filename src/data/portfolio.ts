@@ -11,6 +11,7 @@ export interface Project {
   imageAlt: string;
   imagePosition: string;
   url: string;
+  caseStudyHref?: string;
 }
 
 export interface Experience {
@@ -50,12 +51,13 @@ export const projects: Project[] = [
   {
     id: 'goldnat',
     name: 'Goldnat',
-    description: 'Website and an admin panel for managing vehicles, pricing and customer offers.',
-    contributions: ['Website development', 'Admin panel'],
+    description: "I built Goldnat's website and adapted Payload CMS to its sales workflow, including tailored vehicle selections and custom customer forms shared through private links.",
+    contributions: ['Full-stack development', 'Payload CMS customisation', 'Sales workflows', 'Deployment'],
     image: goldnatImage,
     imageAlt: 'A black car outside a lit concrete building at night, from the Goldnat website.',
     imagePosition: 'center 75%',
     url: 'https://goldnat.pl/',
+    caseStudyHref: '/work/goldnat/',
   },
   {
     id: 'mlyn-nad-sanna',

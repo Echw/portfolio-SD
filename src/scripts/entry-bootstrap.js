@@ -2,11 +2,11 @@
 (() => {
   const root = document.documentElement;
   const navigation = performance.getEntriesByType('navigation')[0];
-  if (window.__portfolioEntry || location.hash || window.scrollY > 8 || document.hidden ||
+  if (window.__portfolioEntry || root.dataset?.routeArrival || location.hash || window.scrollY > 8 || document.hidden ||
       navigation?.type === 'back_forward' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   let timeout;
-  const events = ['pointerdown', 'wheel', 'touchstart', 'keydown', 'scroll', 'pagehide', 'visibilitychange'];
+  const events = ['pointerdown', 'wheel', 'touchstart', 'keydown', 'scroll', 'pagehide', 'visibilitychange', 'portfolio:route-arrive'];
   const entry = {
     pending: true,
     finish() {

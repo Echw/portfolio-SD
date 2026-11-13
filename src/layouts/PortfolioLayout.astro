@@ -1,0 +1,63 @@
+---
+import '@fontsource-variable/archivo';
+import '@fontsource-variable/archivo/standard-italic.css';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import transitionStyles from '../styles/transitions.css?raw';
+import Header from '../components/Header.astro';
+import Contact from '../components/Contact.astro';
+import Backdrop from '../components/Backdrop.astro';
+import { profile } from '../data/portfolio';
+import entryBootstrap from '../scripts/entry-bootstrap.js?raw';
+import routeTransition from '../scripts/route-transition.js?raw';
+
+interface Props {
+  title: string;
+  description: string;
+  home?: boolean;
+  transitionLabel?: string;
+  schema?: Record<string, unknown>;
+}
+const { title, description, home = false, transitionLabel = 'Homepage', schema } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0a0a0a" />
+    <!-- Cross-document opt-in must exist before first paint, including in Vite dev. -->
+    <style is:inline set:html={transitionStyles} />
+    <script is:inline set:html={routeTransition} />
+    {home && <script is:inline set:html={entryBootstrap} />}
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content={home ? 'website' : 'article'} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="/og.png" />
+    <meta property="og:image:alt" content={`${profile.name} — Full-stack developer`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
+  </head>
+  <body data-page={home ? 'home' : 'case-study'}>
+    <Backdrop />
+    <div class="route-curtain" data-route-curtain aria-hidden="true"></div>
+    <div class="route-label" data-route-label={transitionLabel} aria-hidden="true">{transitionLabel}</div>
+    {home && <div class="entry-curtain" data-entry-curtain aria-hidden="true"></div>}
+    <div class="cursor-layer" data-cursor-layer aria-hidden="true" hidden>
+      <div class="cursor-dot" data-cursor-dot><span></span></div>
+      <div class="cursor-ring" data-cursor-ring><span></span></div>
+    </div>
+    <Header home={home} />
+    <main id="main" tabindex="-1">
+      <slot />
+      <Contact home={home} />
+    </main>
+    <script>
+      import { initializePortfolio } from '../scripts/motion';
+      initializePortfolio();
+    </script>
+  </body>
+</html>

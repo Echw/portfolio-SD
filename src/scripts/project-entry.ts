@@ -26,17 +26,19 @@ export function initializeProjectEntry(root: HTMLElement, hold: (finish: () => v
       // Keyboard navigation must never wait for the reveal or delay.
       const focus = () => finish();
       card.addEventListener('focus', focus);
+      window.addEventListener('portfolio:route-arrive', finish);
       cleanups.push(() => {
         animation?.kill(); trigger?.kill();
         releaseScroll?.();
         releaseScroll = undefined;
         card.removeEventListener('focus', focus);
+        window.removeEventListener('portfolio:route-arrive', finish);
         entry.classList.remove('is-entering');
         delete card.dataset.projectReady;
         gsap.set(entry, { clearProps: 'transform' });
         gsap.set(arrival, { clearProps: 'transform,opacity' });
       });
-      if (card.dataset.projectRevealed || card === document.activeElement || card.getBoundingClientRect().bottom <= 0) {
+      if (document.documentElement?.dataset.routeArrival || card.dataset.projectRevealed || card === document.activeElement || card.getBoundingClientRect().bottom <= 0) {
         finish(); return;
       }
       card.dataset.projectReady = 'false';

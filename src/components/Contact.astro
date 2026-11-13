@@ -1,5 +1,7 @@
 ---
 import { profile } from '../data/portfolio';
+interface Props { home?: boolean }
+const { home = true } = Astro.props;
 const navigation = [
   { label: 'About', href: '#about' },
   { label: 'Stack', href: '#stack' },
@@ -16,7 +18,7 @@ const navigation = [
   <div class="footer-columns" data-footer-part>
     <nav aria-label="Footer navigation">
       <h3 class="eyebrow">Explore</h3>
-      <ul>{navigation.map((item) => <li><a class="text-link" href={item.href}>{item.label}</a></li>)}</ul>
+      <ul>{navigation.map((item) => <li><a class="text-link" href={home ? item.href : '/' + item.href}>{item.label}</a></li>)}</ul>
     </nav>
     <div class="footer-contact">
       <h3 class="eyebrow">Say hello</h3>

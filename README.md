@@ -3,6 +3,34 @@
 Lokalne, statyczne portfolio w Astro + TypeScript. Własne komponenty, zwykły CSS,
 lokalne fonty Archivo / Inter, GSAP / ScrollTrigger oraz Lenis. Projekt nie został opublikowany.
 
+## Goldnat — case study
+
+Podstrona: `/work/goldnat/`. Karta Goldnat otwiera case study, a odnośnik do publicznej
+realizacji jest na podstronie. Pozostałe karty zachowują dotychczasowe zachowanie.
+Treść i podpisy są w `src/data/case-studies.ts`, oryginalne screeny w `src/assets/goldnat/`.
+Layout współdzieli header, kontakt, tło i kursor ze stroną główną. Screeny zachowują
+proporcje i podpisy, bez linków do powiększania. Zdjęcie otwierające pozostaje dotychczasowe.
+
+Przejście stron to jeden jednolity panel w kolorze tła (`--bg`), bez strun w środku,
+z prostym obrysem 1 px. Rozciąga się od lewej przez 550 ms, zakrywa ekran przez 600 ms,
+a następnie zsuwa w prawo przez 550 ms. Widoki zmieniają się pod pełnym zakryciem po 850 ms.
+Panel jest stale pod treścią (`z-index: -1`); nie pojawia się nad stroną przed przejściem.
+Obrys istnieje tylko na animowanym snapshocie. Łącznie 1700 ms, z płynnym przyspieszeniem i hamowaniem.
+Pod pełnym zakryciem pojawia się nazwa strony docelowej: 150 ms wejścia, 300 ms pauzy,
+150 ms wygaszenia. Osobny snapshot napisu zapobiega jego rozciąganiu. Layout przyjmuje
+`transitionLabel` (Goldnat; domyślnie Homepage). Powrót na stronę główną dobiera napis
+do celu: All projects dla #work, nazwa sekcji dla About/Stack/Experience/Contact,
+Homepage dla #top i bez kotwicy. W zwykłym widoku napis jest pod nieprzezroczystym panelem.
+Nie ma kopii canvas, wygiętych masek ani przenikania treści. Nawigacja i historia są natywne.
+Style przejścia są osadzone w head przed pierwszą klatką, również w dev; plik CSS ma UTF-8 bez BOM.
+Tło rysuje się przed oczekiwaniem na fonty; po opuszczeniu strony zachowuje ostatnią klatkę.
+Powrót przez przejście pomija intro hero i wejście kart; zmiana rozmiaru przerywa przejście.
+Bez obsługi View Transitions lub przy ograniczeniu ruchu działa zwykła nawigacja.
+Na podstronie nie uruchamiają się intro hero ani animacje wejścia kart strony głównej.
+
+Publiczny katalog opisany jest jako działający; prywatne oferty i formularze jako
+wdrożony prototyp do prób pracowniczych. Nie używamy interfejsów z wygenerowanych makiet.
+
 ## Uruchamianie
 
 Wymagany Node.js >= 22.23.4. W Windows PowerShell używaj npm.cmd:

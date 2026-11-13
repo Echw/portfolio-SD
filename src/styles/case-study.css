@@ -1,0 +1,61 @@
+@layer components {
+  .case-study { --case-space: clamp(88px, 11svh, 144px); }
+  .case-hero { min-height: 100svh; padding-top: calc(var(--header-height) + 32px); padding-bottom: 32px; }
+  .case-back { display: inline-block; font-size: 16px; color: var(--muted); }
+  .case-hero-heading { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: center; gap: 64px; margin-block: 24px 40px; }
+  .case-hero h1 { font: 640 clamp(88px, 10vw, 158px)/.96 var(--font-display); letter-spacing: -.04em; }
+  .case-hero-summary { max-width: 390px; justify-self: end; }
+  .case-hero-summary p { font-size: clamp(22px, 2vw, 30px); line-height: 1.35; text-wrap: pretty; }
+  .case-hero-summary > a { display: inline-block; margin-top: 24px; font-size: 16px; }
+  .case-hero-summary > a > span[aria-hidden] { color: var(--accent); }
+  .case-cover { height: clamp(260px, 38svh, 460px); overflow: hidden; background: #121110; }
+  .case-cover picture, .case-cover img { display: block; width: 100%; height: 100%; }
+  .case-cover img { object-fit: cover; object-position: center 75%; }
+  .case-hero-foot { display: flex; justify-content: space-between; gap: 24px; margin-top: 18px; font-size: 16px; color: var(--muted); }
+  .case-section { min-height: calc(100svh - var(--header-height)); padding-block: var(--case-space); display: flex; flex-direction: column; justify-content: center; gap: 72px; }
+  .case-section-copy { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(64px, 8vw, 136px); align-items: start; }
+  .case-section h2 { max-width: 12ch; font: 600 clamp(44px, 4.4vw, 72px)/1.08 var(--font-display); letter-spacing: -.035em; text-wrap: balance; }
+  .case-prose { max-width: 55ch; font-size: clamp(20px, 1.55vw, 24px); line-height: 1.6; }
+  .case-prose p + p { margin-top: 32px; color: var(--muted); }
+  .case-contribution, .case-technologies { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(64px, 8vw, 136px); }
+  .case-contribution h3, .case-technologies h3 { font-size: 16px; font-weight: 400; color: var(--muted); }
+  .case-contribution ul { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 32px; font-size: 18px; }
+  .case-technologies ul { display: flex; flex-wrap: wrap; gap: 16px 32px; font-size: 20px; }
+  .case-figure { min-width: 0; }
+  .case-image { display: block; background: #111; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .case-image picture, .case-image img { display: block; width: 100%; height: auto; }
+  .case-figure figcaption { display: flex; justify-content: space-between; gap: 24px; margin-top: 20px; font-size: 15px; line-height: 1.5; color: var(--muted); }
+  .case-figure figcaption > span { max-width: 70ch; }
+  .case-figure--detail { width: 70%; margin-left: auto; }
+  .case-end-links { display: flex; justify-content: space-between; gap: 24px; margin-top: 24px; font-size: 18px; }
+  .case-study :is(h1, h2, h3, p, li, figcaption) { user-select: text; -webkit-user-select: text; }
+}
+@layer responsive {
+  @media (max-width: 1023px) {
+    .case-hero-heading { gap: 40px; }
+    .case-hero h1 { font-size: clamp(72px, 11vw, 112px); }
+    .case-section-copy, .case-contribution, .case-technologies { gap: 48px; }
+    .case-section h2 { font-size: 44px; }
+    .case-contribution ul { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 767px) {
+    .case-study { --case-space: 80px; }
+    .case-hero { min-height: auto; padding-top: calc(var(--header-height) + 40px); padding-bottom: 40px; }
+    .case-hero-heading { grid-template-columns: 1fr; gap: 32px; margin-block: 40px; }
+    .case-hero h1 { font-size: clamp(64px, 16vw, 112px); }
+    .case-hero-summary { justify-self: start; max-width: 28ch; }
+    .case-hero-summary p { font-size: 22px; }
+    .case-cover { height: auto; aspect-ratio: 4 / 3; }
+    .case-hero-foot { font-size: 14px; }
+    .case-section { min-height: auto; gap: 48px; }
+    .case-section-copy, .case-contribution, .case-technologies { grid-template-columns: 1fr; gap: 32px; }
+    .case-section h2 { font-size: clamp(36px, 8vw, 52px); max-width: 17ch; }
+    .case-prose { font-size: 18px; }
+    .case-prose p + p { margin-top: 24px; }
+    .case-contribution ul { gap: 12px; }
+    .case-technologies ul { font-size: 18px; gap: 12px 24px; }
+    .case-figure--detail { width: 100%; }
+    .case-figure figcaption { flex-direction: column; gap: 12px; font-size: 14px; }
+    .case-end-links { align-items: flex-start; flex-direction: column; gap: 28px; font-size: 16px; }
+  }
+}

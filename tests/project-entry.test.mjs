@@ -42,15 +42,30 @@ function harness({ width = 1440, failTrigger = false, count = 2, fit = width >= 
     triggers.push(trigger); return trigger;
   } };
   const exports = {};
+  const window = Object.assign(new EventTarget(), { innerWidth: width, innerHeight: 900 });
   runInNewContext(source, {
     exports, require: (name) => name === 'gsap' ? { gsap } : { ScrollTrigger },
-    window: { innerWidth: width, innerHeight: 900 }, document: { activeElement: null }, Event,
+    window, document: { activeElement: null }, Event,
     console: { error: (...values) => errors.push(values) },
   });
   const root = { querySelectorAll: () => cards };
   const hold = (finish, target) => { holders.add(finish); framed.push(target); return () => holders.delete(finish); };
-  return { cards, timelines, triggers, sets, errors, holders, section, framed, initialize: () => exports.initializeProjectEntry(root, hold) };
+  return { cards, timelines, triggers, sets, errors, holders, section, framed, window, initialize: () => exports.initializeProjectEntry(root, hold) };
 }
+
+test('a route arrival finishes pending card entrances and releases their scroll hold', () => {
+  const h = harness();
+  const cleanup = h.initialize();
+  h.triggers[0].options.onEnter();
+  h.window.dispatchEvent(new Event('portfolio:route-arrive'));
+  assert.equal(h.holders.size, 0);
+  assert.ok(h.cards.every((card) => card.dataset.projectReady === 'true'));
+  assert.ok(h.timelines.every((timeline) => timeline.killed));
+  cleanup();
+  const eventCounts = h.cards.map((card) => card.events.length);
+  h.window.dispatchEvent(new Event('portfolio:route-arrive'));
+  assert.deepEqual(h.cards.map((card) => card.events.length), eventCounts);
+});
 
 test('cards arrive from below the viewport before either turns; stages retain 160ms stagger and a one-shot trigger', () => {
   const h = harness(); const cleanup = h.initialize();

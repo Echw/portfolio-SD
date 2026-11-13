@@ -1,13 +1,16 @@
 ---
 import { profile } from '../data/portfolio';
+interface Props { home?: boolean }
+const { home = true } = Astro.props;
+const homeLink = (hash: string) => home ? hash : '/' + hash;
 ---
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header" data-header>
   <div class="container header-inner">
-    <a class="site-name" href="#top" aria-label={`${profile.name}, back to top`}>{profile.name}</a>
+    <a class="site-name" href={homeLink('#top')} aria-label={`${profile.name}, ${home ? 'back to top' : 'home'}`}>{profile.name}</a>
     <nav aria-label="Main navigation">
-      <a class="text-link" href="#about">About</a>
-      <a class="text-link" href="#work">Work</a>
+      <a class="text-link" href={homeLink('#about')}>About</a>
+      <a class="text-link" href={homeLink('#work')}>Work</a>
       <a class="text-link" href="#contact">Contact</a>
     </nav>
   </div>

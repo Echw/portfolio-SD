@@ -7,18 +7,33 @@ import { join } from 'node:path';
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 const html = readFileSync(join(dist, 'index.html'), 'utf8');
 
+test('each destination supplies its own decorative default transition label', () => {
+  for (const [path, label] of [['index.html', 'Homepage'], ['work/goldnat/index.html', 'Goldnat']]) {
+    const page = readFileSync(join(dist, path), 'utf8');
+    const labels = [...page.matchAll(/<div\b[^>]*data-route-label\b[^>]*>([^<]*)<\/div>/g)];
+    assert.equal(labels.length, 1);
+    assert.equal(labels[0][1], label);
+    assert.match(labels[0][0], /aria-hidden="true"/);
+    assert.doesNotMatch(labels[0][0], /tabindex/);
+  }
+});
+
 test('the static document contains both real projects without requiring JavaScript', () => {
   assert.match(html, /data-project-section data-project-count="2"/);
   const articles = [...html.matchAll(/<article\b[^>]*data-project\b[\s\S]*?<\/article>/g)].map((match) => match[0]);
   assert.equal(articles.length, 2);
   assert.match(articles[0], /Goldnat/);
   assert.match(articles[1], /Młyn nad Sanną/);
+  assert.match(articles[0], /href="\/work\/goldnat\/"/);
+  assert.doesNotMatch(articles[0], /target="_blank"/);
+  assert.match(articles[1], /target="_blank"/);
   for (const article of articles) {
     const openingTag = article.slice(0, article.indexOf('>') + 1);
     assert.doesNotMatch(openingTag, /\binert(?:\s|=|>)/);
     assert.doesNotMatch(openingTag, /aria-hidden="true"/);
     assert.doesNotMatch(article, /visibility:\s*hidden|opacity:\s*0/);
-    assert.match(article, /Visit website/);
+    const action = article.includes('/work/goldnat/') ? 'Read case study' : 'Visit website';
+    assert.ok(article.includes(action));
     assert.match(article, /<picture>/);
     assert.equal([...article.matchAll(/<a\b/g)].length, 1);
     assert.match(article, /data-project-arrival/);
@@ -27,7 +42,7 @@ test('the static document contains both real projects without requiring JavaScri
     assert.match(article, /class="project-back" aria-hidden="true"><\/div>/);
     const order = ['data-project-title', '<figure', 'data-project-copy', 'data-project-scope', 'data-project-action'].map((marker) => article.indexOf(marker));
     assert.ok(order.every((position, index) => position >= 0 && (!index || position > order[index - 1])), 'Title, photo, description, scope and action follow the chosen reading order');
-    assert.equal([...article.matchAll(/Visit website/g)].length, 1);
+    assert.equal(article.split(action).length - 1, 1);
     assert.doesNotMatch(article, /card-arrow/);
     assert.match(article, /<a\b[^>]*draggable="false"/);
     assert.match(article, /<img\b[^>]*draggable="false"/);
@@ -39,7 +54,7 @@ test('navigation destinations exist once and contact links contain real supplied
     assert.equal([...html.matchAll(new RegExp(`\\bid="${id}"`, 'g'))].length, 1, id);
   }
   assert.match(html, /href="mailto:stojaniuk\.damian@gmail\.com"/);
-  assert.match(html, /href="https:\/\/goldnat\.pl\/"/);
+  assert.match(html, /href="\/work\/goldnat\/"/);
   assert.match(html, /href="https:\/\/mlynnadsanna\.pl\/"/);
   assert.match(html, /Development from supplied design/);
   assert.equal([...html.matchAll(/data-experience-row/g)].length, 6);
@@ -92,8 +107,12 @@ test('all built image variants and local stylesheet/script assets exist', () => 
 });
 
 test('SEO and baseline accessibility are available in the generated HTML', () => {
-  assert.equal([...html.matchAll(/data-backdrop/g)].length, 1);
-  assert.match(html, /<body>\s*<canvas[^>]*data-backdrop aria-hidden="true"><\/canvas>/);
+  const transitionStyle = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)]
+    .find((match) => match[1].includes('@view-transition'));
+  assert.ok(transitionStyle, 'Cross-document opt-in is inline before first paint');
+  assert.notEqual(transitionStyle[1].charCodeAt(0), 0xfeff, 'A BOM in inline CSS invalidates the first at-rule');
+  assert.equal([...html.matchAll(/<canvas\b[^>]*\bdata-backdrop\b/g)].length, 1);
+  assert.match(html, /<body\b[^>]*>\s*<canvas[^>]*data-backdrop aria-hidden="true"><\/canvas>/);
   assert.match(html, /<html lang="en"/);
   assert.match(html, /<meta name="description" content="[^"]+"/);
   assert.match(html, /<meta property="og:image"/);

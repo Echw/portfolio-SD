@@ -20,6 +20,7 @@ export async function initializePortfolio(): Promise<void> {
   const root = document.querySelector<HTMLElement>('main');
   const header = document.querySelector<HTMLElement>('[data-header]');
   if (!root || !header) return;
+  const home = document.body.dataset.page === 'home';
   const media = gsap.matchMedia();
   let disposed = false;
   let scroll: ReturnType<typeof initializeScroll> | undefined;
@@ -47,9 +48,17 @@ export async function initializePortfolio(): Promise<void> {
   };
 
   try {
+    // Paint the field before font loading; the incoming snapshot needs a complete background.
+    media.add({
+      normal: '(prefers-reduced-motion: no-preference)',
+      fine: '(hover: hover) and (pointer: fine)',
+    }, (context) => initializeBackdrop({
+      interactive: Boolean(context.conditions?.normal && context.conditions?.fine),
+      compact: !context.conditions?.fine,
+    }));
     await Promise.race([document.fonts.ready, new Promise((resolve) => window.setTimeout(resolve, 800))]);
     if (disposed) return;
-    disposeProjectLayout = initializeProjectLayout(root, header, () => ScrollTrigger.refresh());
+    if (home) disposeProjectLayout = initializeProjectLayout(root, header, () => ScrollTrigger.refresh());
     media.add({
       normal: '(prefers-reduced-motion: no-preference)',
       fine: '(hover: hover) and (pointer: fine)',
@@ -59,7 +68,6 @@ export async function initializePortfolio(): Promise<void> {
       const fine = Boolean(context.conditions?.fine);
       if (!normal) window.__portfolioEntry?.finish();
       const dispose: (() => void)[] = [];
-      dispose.push(initializeBackdrop({ interactive: normal && fine, compact: !fine }));
       const scopedScroll = initializeScroll(header, normal);
       scroll = scopedScroll;
       dispose.push(() => {
@@ -69,12 +77,12 @@ export async function initializePortfolio(): Promise<void> {
       if (normal) {
         const hero = root.querySelector<HTMLElement>('[data-hero]');
         if (hero) dispose.push(initializeHero(hero));
-        dispose.push(initializeProjectEntry(root, scopedScroll.hold));
+        if (home) dispose.push(initializeProjectEntry(root, scopedScroll.hold));
         if (fine) {
-          dispose.push(initializeCards(root));
+          if (home) dispose.push(initializeCards(root));
           dispose.push(initializeCursor());
         }
-        gsap.from('[data-experience-row]', {
+        if (home) gsap.from('[data-experience-row]', {
           autoAlpha: 0, y: 48, duration: 1.1, stagger: .1, ease: 'expo.out',
           scrollTrigger: { trigger: '.experience-list', start: 'top 82%', once: true },
         });
@@ -92,7 +100,7 @@ export async function initializePortfolio(): Promise<void> {
             scrollTrigger: { trigger: '[data-about-copy]', start: 'top 78%', end: 'bottom 40%', scrub: .45 },
           });
         }
-        gsap.from('[data-stack-tag]', {
+        if (home) gsap.from('[data-stack-tag]', {
           autoAlpha: 0, y: 12, duration: .45, stagger: .035, ease: 'power2.out',
           scrollTrigger: { trigger: '.stack-list', start: 'top 90%', once: true },
         });
