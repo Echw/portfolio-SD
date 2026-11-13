@@ -149,6 +149,24 @@ test('Sanna uses the accepted 550 / 600 / 550 ms persistent curtain sequence', a
   h.dispose();
 });
 
+test('all experience destinations use full company labels and retain curtain timing', async () => {
+  for (const [id, title] of [['flyps', 'Flyps'], ['thebrain', 'TheBrain Software House'], ['xolvio', 'Xolv.io'], ['leaderna', 'Leaderna Platform'], ['eleader', 'eLeader'], ['plum', 'PLUM']]) {
+    const h = harness();
+    const navigation = h.prepare({ to: `/experience/${id}/`, title });
+    assert.equal(h.timelines[0].steps[0].properties.duration, .55);
+    h.timelines[0].finish(); await navigation.loading;
+    navigation.swap(); await flush();
+    assert.equal(h.label.textContent, title);
+    const titleEnd = h.timelines[1].steps[1];
+    assert.equal(titleEnd.position + titleEnd.properties.duration, .6);
+    h.timelines[1].finish(); await flush();
+    assert.equal(h.timelines[2].steps[0].properties.duration, .55);
+    h.timelines[2].finish(); await flush();
+    assert.equal(h.main.inert, false);
+    h.dispose();
+  }
+});
+
 test('reduced motion swaps without animation or delay and history does not reset scroll to the hash', async () => {
   const h = harness({ reduced: true });
   const navigation = h.prepare({ to: '/#work', page: 'home', title: 'Homepage', type: 'traverse' });

@@ -1,0 +1,40 @@
+@layer components {
+  .experience-hero { padding-top: calc(var(--header-height) + 32px); padding-bottom: 48px; }
+  .experience-hero > .eyebrow { margin-top: 64px; }
+  .experience-hero h1 { max-width: 15ch; margin-block: 24px 48px; font: 640 clamp(64px, 8.4vw, 136px)/1.02 var(--font-display); letter-spacing: -.04em; text-wrap: balance; overflow-wrap: break-word; }
+  .experience-meta { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(64px, 8vw, 136px); align-items: baseline; }
+  .experience-detail-role { font: 560 clamp(24px, 2.2vw, 34px)/1.3 var(--font-display); letter-spacing: -.02em; }
+  .experience-dates { color: var(--muted); font-size: 18px; font-variant-numeric: tabular-nums; }
+  .experience-dates p + p { margin-top: 8px; }
+  .experience-section { padding-block: clamp(40px, 5vw, 72px); }
+  .experience-section h2 { max-width: 19ch; font: 600 clamp(32px, 3.2vw, 48px)/1.12 var(--font-display); letter-spacing: -.03em; text-wrap: balance; }
+  .experience-contributions { padding-left: 1.1em; list-style: disc; }
+  .experience-contributions li + li { margin-top: 24px; }
+  .experience-contributions li::marker { color: var(--muted); font-size: .65em; }
+  .experience-project-context { color: var(--muted); font-size: 16px; }
+  .experience-detail .experience-project-context + p { margin-top: 24px; color: var(--ink); }
+  .experience-references { margin-top: 36px; font-size: 16px; }
+  .experience-references h3 { margin-bottom: 16px; font-size: inherit; font-weight: 400; color: var(--muted); }
+  .experience-references li + li { margin-top: 16px; }
+  .experience-references a { display: inline-block; }
+  .experience-references [aria-hidden] { color: var(--accent); }
+  .experience-detail .case-technologies h2 { font: 400 16px/1.5 var(--font-body); letter-spacing: 0; color: var(--muted); max-width: none; text-wrap: initial; }
+  .experience-technology-note { margin-top: 8px; color: var(--muted); font-size: 14px; }
+  .experience-end { padding-block: 32px 72px; font-size: 18px; }
+}
+@layer responsive {
+  @media (max-width: 1023px) {
+    .experience-meta { gap: 48px; }
+  }
+  @media (max-width: 767px) {
+    .experience-hero { padding-top: calc(var(--header-height) + 40px); padding-bottom: 24px; }
+    .experience-hero > .eyebrow { margin-top: 48px; font-size: 14px; }
+    .experience-hero h1 { font-size: clamp(44px, 11.5vw, 80px); margin-block: 24px 32px; }
+    .experience-meta { grid-template-columns: 1fr; gap: 16px; }
+    .experience-dates { font-size: 16px; }
+    .experience-section { padding-block: 32px; }
+    .experience-section h2 { font-size: 32px; }
+    .experience-contributions li + li { margin-top: 20px; }
+    .experience-end { padding-block: 24px 48px; font-size: 16px; }
+  }
+}

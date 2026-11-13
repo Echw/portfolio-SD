@@ -1,0 +1,145 @@
+{
+  "browser": "156.0.8078.4",
+  "qa": [
+    {
+      "label": "Homepage",
+      "url": "http://127.0.0.1:4322/#top"
+    },
+    {
+      "history": {
+        "scrollBefore": 779,
+        "restored": 779
+      }
+    },
+    {
+      "label": "About",
+      "url": "http://127.0.0.1:4322/#about"
+    },
+    {
+      "label": "All projects",
+      "url": "http://127.0.0.1:4322/#work"
+    },
+    {
+      "label": "Stack",
+      "url": "http://127.0.0.1:4322/#stack"
+    },
+    {
+      "label": "Experience",
+      "url": "http://127.0.0.1:4322/#experience"
+    },
+    {
+      "label": "All projects",
+      "url": "http://127.0.0.1:4322/#work"
+    },
+    {
+      "label": "About",
+      "url": "http://127.0.0.1:4322/#about"
+    },
+    {
+      "anchors": {
+        "anchorBefore": 3056,
+        "anchorAfter": 3056,
+        "forward": 0
+      }
+    },
+    {
+      "noJavaScript": "all six navigation and top returns",
+      "reducedMotion": "all six navigation, bottom returns, hidden curtain, all reveals visible"
+    },
+    {
+      "keyboard": "Tab focus and Enter from homepage row and top return",
+      "hover": "TheBrain row"
+    },
+    {
+      "label": "All projects",
+      "url": "http://127.0.0.1:4322/#work"
+    },
+    {
+      "label": "Goldnat",
+      "url": "http://127.0.0.1:4322/work/goldnat/"
+    },
+    {
+      "label": "All projects",
+      "url": "http://127.0.0.1:4322/#work"
+    },
+    {
+      "label": "Młyn nad Sanną",
+      "url": "http://127.0.0.1:4322/work/mlyn-nad-sanna/"
+    },
+    {
+      "label": "All projects",
+      "url": "http://127.0.0.1:4322/#work"
+    },
+    {
+      "exploratory": "Resize and Tab during curtains leave navigation usable"
+    },
+    {
+      "mobileHistory": {
+        "mobileBefore": 599,
+        "mobileAfter": 600
+      }
+    }
+  ],
+  "errors": [],
+  "normalCompanyRoutes": [
+    [
+      "flyps",
+      "Flyps"
+    ],
+    [
+      "thebrain",
+      "TheBrain Software House"
+    ],
+    [
+      "xolvio",
+      "Xolv.io"
+    ],
+    [
+      "leaderna",
+      "Leaderna Platform"
+    ],
+    [
+      "eleader",
+      "eLeader"
+    ],
+    [
+      "plum",
+      "PLUM"
+    ]
+  ],
+  "normalReturnLinks": "top and bottom checked for every company",
+  "directCompanyRoutes": [
+    [
+      "flyps",
+      "Flyps"
+    ],
+    [
+      "thebrain",
+      "TheBrain Software House"
+    ],
+    [
+      "xolvio",
+      "Xolv.io"
+    ],
+    [
+      "leaderna",
+      "Leaderna Platform"
+    ],
+    [
+      "eleader",
+      "eLeader"
+    ],
+    [
+      "plum",
+      "PLUM"
+    ]
+  ],
+  "revealResults": [
+    "flyps",
+    "thebrain",
+    "xolvio",
+    "leaderna",
+    "eleader",
+    "plum"
+  ]
+}

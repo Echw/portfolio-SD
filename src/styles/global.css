@@ -142,12 +142,15 @@
   .project-card:focus-visible .project-front::after { opacity: 1; background: radial-gradient(400px circle at 50% 50%, rgb(255 239 219 / 10%), transparent 70%); }
 
   .experience { min-height: 100svh; }
-  .experience-row { position: relative; display: grid; grid-template-columns: 1fr 1.45fr auto; gap: 24px; align-items: baseline; padding-block: 28px; border-bottom: 1px solid var(--line); }
+  .experience-row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) auto; gap: 24px; align-items: baseline; padding-block: 28px; border-bottom: 1px solid var(--line); }
   .experience-row::after { content: ''; position: absolute; inset: auto 0 -1px; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 500ms var(--ease-out); }
-  .experience-company { font: 620 clamp(26px, 2.4vw, 38px)/1.2 var(--font-display); letter-spacing: -.025em; transition: color 350ms ease, transform 500ms var(--ease-out); }
+  .experience-company { display: flex; align-items: baseline; gap: .2em; font: 620 clamp(26px, 2.4vw, 38px)/1.2 var(--font-display); letter-spacing: -.025em; transition: color 350ms ease, transform 500ms var(--ease-out); }
   .experience-role { font: 560 clamp(19px, 1.75vw, 27px)/1.4 var(--font-display); letter-spacing: -.02em; }
   .experience-summary { margin-top: 6px; font-size: 19px; }
   .experience-period { color: var(--muted); font-size: 19px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .experience-arrow { flex: none; color: var(--muted); font-size: .6em; }
+  .experience-row:focus-visible .experience-company, .experience-row:active .experience-company { color: var(--accent); }
+  .experience-row:focus-visible::after { transform: scaleX(1); }
 
   .about { padding-bottom: clamp(96px, 13vh, 160px); }
   .about-intro { margin-top: 64px; font: 550 clamp(34px, 4.35vw, 70px)/1.24 var(--font-display); letter-spacing: -.03em; text-wrap: pretty; }
@@ -200,7 +203,7 @@
     :root { --header-height: 96px; }
     .site-header nav { gap: 28px; }
     .project-grid { gap: 24px; }
-    .experience-row { grid-template-columns: 1fr 1.4fr; row-gap: 8px; }
+    .experience-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); row-gap: 8px; }
     .experience-period { grid-column: 2; font-size: 17px; }
     .experience-summary { font-size: 17px; }
     .footer-columns { gap: 48px; }

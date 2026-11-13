@@ -14,13 +14,6 @@ export interface Project {
   caseStudyHref?: string;
 }
 
-export interface Experience {
-  company: string;
-  role: string;
-  period: string;
-  summary?: string;
-}
-
 export interface HeroHeadline {
   lines: [string, string];
 }
@@ -70,15 +63,6 @@ export const projects: Project[] = [
     url: 'https://mlynnadsanna.pl/',
     caseStudyHref: '/work/mlyn-nad-sanna/',
   },
-];
-
-export const experience: Experience[] = [
-  { company: 'Flyps', role: 'Senior Full-Stack Developer', period: '11.2025 — Present', summary: 'AI features and developer tools.' },
-  { company: 'TheBrain', role: 'Senior Full-Stack Developer', period: '05.2025 — 10.2025', summary: 'Interactive learning with AI.' },
-  { company: 'Xolv.io', role: 'Full-Stack Developer', period: '07.2021 — 04.2025', summary: '2K websites and browser-to-hardware tooling.' },
-  { company: 'Leaderna', role: 'Full-Stack Developer · Part-time', period: '10.2022 — 05.2023' },
-  { company: 'eLeader', role: 'Junior Software Developer', period: '01.2020 — 05.2021' },
-  { company: 'Plum', role: 'Intern / Junior Developer', period: '07.2018 — 06.2019' },
 ];
 
 export const stack = [

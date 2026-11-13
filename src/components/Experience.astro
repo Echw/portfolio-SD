@@ -1,5 +1,5 @@
 ---
-import { experience } from '../data/portfolio';
+import { experience, experienceHref } from '../data/experience';
 ---
 <section id="experience" class="experience container section" aria-labelledby="experience-title">
   <div class="section-heading">
@@ -8,13 +8,15 @@ import { experience } from '../data/portfolio';
   </div>
   <ol class="experience-list" aria-label="Professional experience">
     {experience.map((item) => (
-      <li class="experience-row" data-experience-row>
-        <h3 class="experience-company">{item.company}</h3>
-        <div class="experience-detail">
-          <p class="experience-role">{item.role}</p>
-          {item.summary && <p class="experience-summary">{item.summary}</p>}
-        </div>
-        <p class="experience-period">{item.period}</p>
+      <li>
+        <a class="experience-row" data-experience-row href={experienceHref(item.id)}>
+          <h3 class="experience-company">{item.company}<span class="experience-arrow" aria-hidden="true">↗</span></h3>
+          <div class="experience-detail">
+            <p class="experience-role">{item.role}{item.arrangement && ' · Part-time'}</p>
+            {item.summary && <p class="experience-summary">{item.summary}</p>}
+          </div>
+          <p class="experience-period">{item.period}</p>
+        </a>
       </li>
     ))}
   </ol>

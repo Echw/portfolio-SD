@@ -46,6 +46,17 @@ Na podstronie nie uruchamiają się intro hero ani animacje wejścia kart strony
 Publiczny katalog opisany jest jako działający; prywatne oferty i formularze jako
 wdrożony prototyp do prób pracowniczych. Nie używamy interfejsów z wygenerowanych makiet.
 
+## Doświadczenie zawodowe
+
+Sześć tekstowych podstron `/experience/{id}/` powstaje z jednego modelu
+`src/data/experience.ts` i komponentu `ExperienceDetail.astro`. Identyfikatory:
+`flyps`, `thebrain`, `xolvio`, `leaderna`, `eleader`, `plum`. Homepage korzysta
+z tych samych nazw, stanowisk, dat i kolejności. Wiersze są zwykłymi linkami.
+Opisy 2K i Hatch są sekcjami Xolv.io, a visual planning — sekcją Leaderna.
+Technologie dotyczą całej roli. Model nie wymaga zdjęć ani adresu realizacji.
+Podstrony współdzielą PortfolioLayout, prymitywy case study i istniejące przejścia.
+Wyniki weryfikacji i ograniczenia: `QA-experience.md`.
+
 ## Uruchamianie
 
 Wymagany Node.js >= 22.23.4. W Windows PowerShell używaj npm.cmd:
@@ -81,12 +92,12 @@ Nie otwieraj dist/index.html przez file:// — użyj serwera.
 
 ## Edycja treści
 
-Wszystkie treści: **src/data/portfolio.ts**.
+Treści homepage: **src/data/portfolio.ts**; doświadczenie: **src/data/experience.ts**;
+case studies: **src/data/case-studies.ts**.
 
 - profile — nazwisko, kontakt, opis i akapit About;
 - heroHeadlines — warianty hero, zawsze po dwa wiersze;
 - projects — projekty własne, ich kolejność, opisy, zdjęcia i zakres pracy;
-- experience — firmy, role, daty i skróty realizacji z CV;
 - stack — lista technologii.
 
 ### Nowy projekt
