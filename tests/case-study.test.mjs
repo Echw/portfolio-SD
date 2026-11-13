@@ -6,6 +6,43 @@ import { join } from 'node:path';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 const html = readFileSync(join(dist, 'work/goldnat/index.html'), 'utf8');
+const sanna = readFileSync(join(dist, 'work/mlyn-nad-sanna/index.html'), 'utf8');
+
+test('Sanna publishes the four supplied chapters and credits design separately from implementation', () => {
+  const headings = [...sanna.matchAll(/<h2\b[^>]*>([^<]+)<\/h2>/g)].map((match) => match[1]);
+  assert.deepEqual(headings.slice(0, 4), [
+    'Bringing the design to the web', 'A consistent experience across pages',
+    'Content the client can manage', 'Launch and handover',
+  ]);
+  assert.match(sanna, /The visual design was supplied by a graphic designer/);
+  assert.match(sanna, /the visual concept belongs to the designer/);
+  assert.match(sanna, /I integrated Sanity CMS/);
+  assert.match(sanna, /not a booking engine or a room-availability management system/);
+  assert.match(sanna, /transferred the repository, hosting and CMS/);
+  for (const text of ['My contribution', 'TypeScript', 'React', 'Next.js', 'Sanity', 'SCSS Modules']) assert.ok(sanna.includes(text));
+  assert.doesNotMatch(sanna, /CRM|Editorial notes|Next useful image|View full.size|placeholder/i);
+});
+
+test('Sanna has project-specific metadata, accessible links and an independent cover position', () => {
+  assert.match(sanna, /<title>Młyn nad Sanną — Case study/);
+  assert.match(sanna, /name="description" content="How I developed Młyn nad Sanną/);
+  assert.equal([...sanna.matchAll(/<h1\b/g)].length, 1);
+  const heading = sanna.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  assert.equal(heading, 'Młyn nad Sanną');
+  assert.match(sanna, /--case-cover-position:\s*center 55%/);
+  assert.doesNotMatch(html, /--case-cover-position:/);
+  assert.match(sanna, /href="https:\/\/mlynnadsanna\.pl\/" target="_blank" rel="noopener noreferrer"/);
+  assert.match(sanna, /href="\/#work"/);
+  for (const match of sanna.matchAll(/href="#([^" ]+)"/g)) assert.ok(sanna.includes(`id="${match[1]}"`), match[1]);
+  const schema = JSON.parse(sanna.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+  assert.equal(schema['@type'], 'CreativeWork');
+  assert.equal(schema.author.name, 'Damian Stojaniuk');
+  assert.equal(schema.about.name, 'Młyn nad Sanną');
+  assert.equal(schema.about.url, 'https://mlynnadsanna.pl/');
+  assert.ok(schema.name.startsWith('Młyn nad Sanną'));
+  for (const img of sanna.matchAll(/<img\b[^>]*>/g)) assert.match(img[0], /alt="[^"]+"/);
+  assert.equal([...sanna.matchAll(/class="case-section-copy" data-reveal/g)].length, 4);
+});
 
 test('Goldnat ships the real copy and correctly distinguishes the live website from staff trials', () => {
   assert.match(html, /long-term vehicle rental with an option to buy/);
@@ -34,9 +71,11 @@ test('the standalone case study has accessible navigation, metadata and no homep
   assert.equal(schema.author.name, 'Damian Stojaniuk');
 });
 
-test('all four real screenshots have captions and responsive assets without enlargement links', () => {
+for (const [project, markup, figureCount] of [['Goldnat', html, 4], ['Sanna', sanna, 3]]) {
+test(`${project} screenshots have captions and responsive assets without enlargement links`, () => {
+  const html = markup;
   const figures = [...html.matchAll(/<figure\b[\s\S]*?<\/figure>/g)].map((m) => m[0]);
-  assert.equal(figures.length, 4);
+  assert.equal(figures.length, figureCount);
   for (const figure of figures) {
     assert.doesNotMatch(figure, /<a\b|View full size|View full-size/);
     assert.match(figure, /<figcaption>/);
@@ -51,3 +90,4 @@ test('all four real screenshots have captions and responsive assets without enla
   const variants = [...html.matchAll(/srcset="([^"]+)"/g)].flatMap((m) => m[1].split(',').map((item) => item.trim().split(/\s+/)[0]));
   for (const reference of [...references, ...variants]) assert.ok(existsSync(join(dist, reference)), `Missing asset: ${reference}`);
 });
+}

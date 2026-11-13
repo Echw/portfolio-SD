@@ -130,6 +130,23 @@ test('labels distinguish Homepage, work and section links while project labels i
     assert.equal(h.routeLabel('home', hash, 'Homepage'), title);
   }
   assert.equal(h.routeLabel('case-study', '#contact', 'Goldnat'), 'Goldnat'); h.dispose();
+  assert.equal(h.routeLabel('case-study', '#context', 'Młyn nad Sanną'), 'Młyn nad Sanną');
+});
+
+test('Sanna uses the accepted 550 / 600 / 550 ms persistent curtain sequence', async () => {
+  const h = harness();
+  const navigation = h.prepare({ to: '/work/mlyn-nad-sanna/', title: 'Młyn nad Sanną' });
+  assert.equal(h.timelines[0].steps[0].properties.duration, .55);
+  h.timelines[0].finish(); await navigation.loading;
+  navigation.swap(); await flush();
+  assert.equal(h.label.textContent, 'Młyn nad Sanną');
+  const titleEnd = h.timelines[1].steps[1];
+  assert.equal(titleEnd.position + titleEnd.properties.duration, .6);
+  h.timelines[1].finish(); await flush();
+  assert.equal(h.timelines[2].steps[0].properties.duration, .55);
+  h.timelines[2].finish(); await flush();
+  assert.equal(h.main.inert, false);
+  h.dispose();
 });
 
 test('reduced motion swaps without animation or delay and history does not reset scroll to the hash', async () => {

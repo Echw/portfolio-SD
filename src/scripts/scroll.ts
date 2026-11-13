@@ -32,13 +32,20 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
     const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - header.offsetHeight - 16);
     const finish = () => {
       if (!focus) return;
+      // Lenis may finish between native scrollend events. Preserve Astro's index
+      // while recording the final anchor position for Back/Forward navigation.
+      if (history.state && typeof history.state.index === 'number') {
+        history.replaceState({ ...history.state, scrollX: window.scrollX, scrollY: window.scrollY }, '');
+      }
       if (!target.hasAttribute('tabindex')) {
         target.setAttribute('tabindex', '-1');
         target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
       }
       target.focus({ preventScroll: true });
     };
-    if (lenis) lenis.scrollTo(top, { immediate, onComplete: finish });
+    // Settle anchor history promptly, without an almost-finished lerp continuing
+    // after the content appears to have arrived.
+    if (lenis) lenis.scrollTo(top, { immediate, duration: .9, lerp: 0, onComplete: finish });
     else { window.scrollTo(0, top); finish(); }
   };
   const click = (event: MouseEvent) => {
@@ -77,6 +84,12 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
     if (event.cancelable) event.preventDefault();
   };
   const interrupt = () => holds.interrupt();
+  const restoreHistory = () => {
+    interrupt();
+    // Astro restores the saved position first. Stop any in-flight anchor tween
+    // so its next frame cannot overwrite that restored position.
+    lenis?.scrollTo(lenis.actualScroll, { immediate: true });
+  };
   const visibility = () => { if (document.hidden) interrupt(); };
   document.addEventListener('click', click, true);
   document.addEventListener('visibilitychange', visibility);
@@ -84,7 +97,7 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
   window.addEventListener('wheel', preventScroll, { passive: false });
   window.addEventListener('touchmove', preventScroll, { passive: false });
   window.addEventListener('resize', interrupt);
-  window.addEventListener('popstate', interrupt);
+  window.addEventListener('popstate', restoreHistory);
   return {
     goTo,
     pause() { holds.interrupt(); lenis?.stop(); },
@@ -112,7 +125,7 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
       window.removeEventListener('wheel', preventScroll);
       window.removeEventListener('touchmove', preventScroll);
       window.removeEventListener('resize', interrupt);
-      window.removeEventListener('popstate', interrupt);
+      window.removeEventListener('popstate', restoreHistory);
       if (lenis) {
         gsap.ticker.remove(tick);
         lenis.off('scroll', ScrollTrigger.update);

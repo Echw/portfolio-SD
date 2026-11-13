@@ -62,12 +62,13 @@ export const projects: Project[] = [
   {
     id: 'mlyn-nad-sanna',
     name: 'Młyn nad Sanną',
-    description: 'Website implemented from a supplied visual design, with a CRM for room management.',
-    contributions: ['Development from supplied design', 'Room-management CRM'],
+    description: "I developed a responsive website from a graphic designer's supplied design, with Sanity CMS for managing room listings and site content. My work included integrations, deployment and handover to the client.",
+    contributions: ['Development from supplied design', 'Sanity CMS', 'Integrations', 'Deployment and handover'],
     image: mlynImage,
     imageAlt: 'Autumn trees reflected in the Sanna river, from the Młyn nad Sanną website.',
     imagePosition: 'center 55%',
     url: 'https://mlynnadsanna.pl/',
+    caseStudyHref: '/work/mlyn-nad-sanna/',
   },
 ];
 

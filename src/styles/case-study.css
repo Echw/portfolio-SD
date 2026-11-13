@@ -4,6 +4,8 @@
   .case-back { display: inline-block; font-size: 16px; color: var(--muted); }
   .case-hero-heading { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: center; gap: 64px; margin-block: 24px 40px; }
   .case-hero h1 { font: 640 clamp(88px, 10vw, 158px)/.96 var(--font-display); letter-spacing: -.04em; }
+  .case-title-line { display: block; }
+  .case-hero-heading--multiline h1 { font-size: clamp(64px, 9vw, 142px); }
   .case-hero-summary { max-width: 390px; justify-self: end; }
   .case-hero-summary p { font-size: clamp(22px, 2vw, 30px); line-height: 1.35; text-wrap: pretty; }
   .case-hero-summary > a { display: inline-block; margin-top: 24px; font-size: 16px; }
@@ -11,7 +13,7 @@
   /* Keep the full car in frame; viewport-based height cropped the roof on wide screens. */
   .case-cover { aspect-ratio: 2 / 1; overflow: hidden; background: #121110; }
   .case-cover picture, .case-cover img { display: block; width: 100%; height: 100%; }
-  .case-cover img { object-fit: cover; object-position: center 75%; }
+  .case-cover img { object-fit: cover; object-position: var(--case-cover-position, center 75%); }
   .case-hero-foot { display: flex; justify-content: space-between; gap: 24px; margin-top: 18px; font-size: 16px; color: var(--muted); }
   .case-section { min-height: calc(100svh - var(--header-height)); padding-block: var(--case-space); display: flex; flex-direction: column; justify-content: center; gap: 72px; }
   .case-section-copy { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(64px, 8vw, 136px); align-items: start; }
@@ -35,6 +37,7 @@
   @media (max-width: 1023px) {
     .case-hero-heading { gap: 40px; }
     .case-hero h1 { font-size: clamp(72px, 11vw, 112px); }
+    .case-hero-heading--multiline h1 { font-size: clamp(64px, 8vw, 96px); }
     .case-section-copy, .case-contribution, .case-technologies { gap: 48px; }
     .case-section h2 { font-size: 44px; }
     .case-contribution ul { grid-template-columns: 1fr; }
@@ -44,6 +47,7 @@
     .case-hero { min-height: auto; padding-top: calc(var(--header-height) + 40px); padding-bottom: 40px; }
     .case-hero-heading { grid-template-columns: 1fr; gap: 32px; margin-block: 40px; }
     .case-hero h1 { font-size: clamp(64px, 16vw, 112px); }
+    .case-hero-heading--multiline h1 { font-size: clamp(56px, 15vw, 112px); }
     .case-hero-summary { justify-self: start; max-width: 28ch; }
     .case-hero-summary p { font-size: 22px; }
     .case-cover { height: auto; aspect-ratio: 4 / 3; }

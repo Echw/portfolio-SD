@@ -14,7 +14,8 @@ function harness({ router = false } = {}) {
   const events = (listeners) => ({ addEventListener: (name, callback) => listeners.set(name, callback), removeEventListener: (name) => listeners.delete(name) });
   const calls = [], navigations = [], historyWrites = []; let lenis;
   const location = { hash: '' };
-  const history = { state: { index: 7, scrollY: 250 }, pushState(...args) { historyWrites.push(args); } };
+  const history = { state: { index: 7, scrollY: 250 }, pushState(...args) { historyWrites.push(args); },
+    replaceState(state) { this.state = state; } };
   const target = { getBoundingClientRect: () => ({ top: 600 }), hasAttribute: () => true, focus() {}, addEventListener() {} };
   class Element {
     closest() { return this; }
@@ -30,6 +31,7 @@ function harness({ router = false } = {}) {
     scrollTo(top, options) {
       if (this.failScroll) throw Error('Framing unavailable');
       calls.push({ top, options, stopped: this.stopped });
+      if (options.onComplete) window.scrollY = top;
       options.onComplete?.();
     }
   }
@@ -69,11 +71,23 @@ test('local anchors use Astro history once and retain smooth scrolling without a
   assert.equal(h.navigations[0].hash, '#about');
   assert.equal(h.historyWrites.length, 0);
   assert.equal(h.history.state.index, 7);
+  assert.equal(h.history.state.scrollY, 722);
   assert.equal(h.calls.at(-1).options.immediate, false);
+  assert.equal(h.calls.at(-1).options.duration, .9);
+  assert.equal(h.calls.at(-1).options.lerp, 0);
   for (const extra of [{ defaultPrevented: true }, { ctrlKey: true }, { metaKey: true }, { button: 1 }]) {
     h.documentEvents.get('click')({ target: h.link, button: 0, ...extra, preventDefault() { throw Error('Must remain native'); } });
   }
   assert.equal(h.navigations.length, 1); h.scroll.destroy();
+});
+
+test('history interrupts an anchor tween at the position restored by the router', () => {
+  const h = harness({ router: true });
+  h.lenis.actualScroll = 80;
+  h.windowEvents.get('popstate')();
+  assert.equal(h.calls.at(-1).top, 80);
+  assert.equal(h.calls.at(-1).options.immediate, true);
+  h.scroll.destroy();
 });
 
 test('navigation pause settles card holds and resumes exactly the current scroll owner', () => {

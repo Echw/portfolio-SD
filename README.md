@@ -3,11 +3,18 @@
 Lokalne, statyczne portfolio w Astro + TypeScript. Własne komponenty, zwykły CSS,
 lokalne fonty Archivo / Inter, GSAP / ScrollTrigger oraz Lenis. Projekt nie został opublikowany.
 
-## Goldnat — case study
+## Goldnat i Młyn nad Sanną — case studies
 
-Podstrona: `/work/goldnat/`. Karta Goldnat otwiera case study, a odnośnik do publicznej
-realizacji jest na podstronie. Pozostałe karty zachowują dotychczasowe zachowanie.
+Podstrony: `/work/goldnat/` i `/work/mlyn-nad-sanna/`. Obie karty otwierają case study,
+a odnośniki do publicznych realizacji są na podstronach.
 Treść i podpisy są w `src/data/case-studies.ts`, oryginalne screeny w `src/assets/goldnat/`.
+Wspólny komponent `src/components/CaseStudy.astro` renderuje model `CaseStudy`,
+a `CaseStudyFigure.astro` odpowiada za ilustracje. Opcjonalne `coverPosition` ustawia
+kadr fotografii (Sanna: `center 55%`, domyślny Goldnat: `center 75%`), a `titleLines`
+pozwala ustalić podział długiego tytułu. Cover ma proporcje 2:1 na desktopie i 4:3 na mobile.
+Sanna zachowuje cztery angielskie rozdziały z `portfolio.md`, przypisuje projekt graficzny
+grafikowi i opisuje Sanity jako CMS. Screeny homepage, apartamentu i edytora Sanity
+są w `src/assets/sanna/`; ich pochodzenie i wyniki kontroli są w `QA-sanna.md`.
 Layout współdzieli header, kontakt, tło i kursor ze stroną główną. Screeny zachowują
 proporcje i podpisy, bez linków do powiększania. Zdjęcie otwierające pozostaje dotychczasowe.
 
@@ -21,7 +28,7 @@ routera są wyłączone. Panel jest niewidoczny w spoczynku i zwinięty przed po
 Łącznie około 1700 ms, z płynnym przyspieszeniem i hamowaniem; wolna sieć wydłuża zakrycie.
 Pod pełnym zakryciem pojawia się nazwa strony docelowej: 150 ms wejścia, 300 ms pauzy,
 150 ms wygaszenia. Osobna warstwa napisu zapobiega jego rozciąganiu. Layout przyjmuje
-`transitionLabel` (Goldnat; domyślnie Homepage). Powrót na stronę główną dobiera napis
+`transitionLabel` (Goldnat lub Młyn nad Sanną; domyślnie Homepage). Powrót na stronę główną dobiera napis
 do celu: All projects dla #work, nazwa sekcji dla About/Stack/Experience/Contact,
 Homepage dla #top i bez kotwicy. Napis jest odczytywany z metadanych nowej strony i docelowego URL.
 Nie ma kopii canvas, wygiętych masek ani przenikania treści. Historią zarządza router Astro.
@@ -30,6 +37,8 @@ Tło rysuje się przed oczekiwaniem na fonty; po opuszczeniu strony zachowuje os
 Powrót przez przejście pomija intro hero i wejście kart; zmiana rozmiaru skraca animację.
 Przed wymianą strony sprzątane są GSAP, Lenis i listenery; po niej uruchamiają się ponownie.
 Wstecz/Dalej zachowuje pozycję scrolla, a lokalne kotwice nie nadpisują stanu historii.
+Scroll do kotwicy kończy się po 900 ms i zapisuje pozycję z zachowaniem indeksu Astro;
+`popstate` przerywa poprzedni ruch Lenis, aby nie nadpisał przywróconej pozycji.
 Ograniczenie ruchu pomija animację. Błąd pobierania lub limit 10 sekund uruchamia zwykłą nawigację.
 Bez JavaScript działają standardowe linki. Weryfikacja wizualna silników jest opisana w QA-goldnat.md.
 Na podstronie nie uruchamiają się intro hero ani animacje wejścia kart strony głównej.

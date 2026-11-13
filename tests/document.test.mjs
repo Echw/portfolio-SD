@@ -8,7 +8,7 @@ const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 const html = readFileSync(join(dist, 'index.html'), 'utf8');
 
 test('each destination supplies its own decorative default transition label', () => {
-  for (const [path, label] of [['index.html', 'Homepage'], ['work/goldnat/index.html', 'Goldnat']]) {
+  for (const [path, label] of [['index.html', 'Homepage'], ['work/goldnat/index.html', 'Goldnat'], ['work/mlyn-nad-sanna/index.html', 'Młyn nad Sanną']]) {
     const page = readFileSync(join(dist, path), 'utf8');
     const labels = [...page.matchAll(/<div\b[^>]*data-route-label\b[^>]*>([^<]*)<\/div>/g)];
     assert.equal(labels.length, 1);
@@ -27,13 +27,15 @@ test('the static document contains both real projects without requiring JavaScri
   assert.match(articles[1], /Młyn nad Sanną/);
   assert.match(articles[0], /href="\/work\/goldnat\/"/);
   assert.doesNotMatch(articles[0], /target="_blank"/);
-  assert.match(articles[1], /target="_blank"/);
+  assert.match(articles[1], /href="\/work\/mlyn-nad-sanna\/"/);
+  assert.doesNotMatch(articles[1], /target="_blank"/);
+  assert.match(articles[1], /aria-label="Read Młyn nad Sanną case study"/);
   for (const article of articles) {
     const openingTag = article.slice(0, article.indexOf('>') + 1);
     assert.doesNotMatch(openingTag, /\binert(?:\s|=|>)/);
     assert.doesNotMatch(openingTag, /aria-hidden="true"/);
     assert.doesNotMatch(article, /visibility:\s*hidden|opacity:\s*0/);
-    const action = article.includes('/work/goldnat/') ? 'Read case study' : 'Visit website';
+    const action = 'Read case study';
     assert.ok(article.includes(action));
     assert.match(article, /<picture>/);
     assert.equal([...article.matchAll(/<a\b/g)].length, 1);
@@ -56,7 +58,8 @@ test('navigation destinations exist once and contact links contain real supplied
   }
   assert.match(html, /href="mailto:stojaniuk\.damian@gmail\.com"/);
   assert.match(html, /href="\/work\/goldnat\/"/);
-  assert.match(html, /href="https:\/\/mlynnadsanna\.pl\/"/);
+  assert.match(html, /href="\/work\/mlyn-nad-sanna\/"/);
+  assert.doesNotMatch(html, /href="https:\/\/mlynnadsanna\.pl\/"|Room-management CRM|CRM for room/);
   assert.match(html, /Development from supplied design/);
   assert.equal([...html.matchAll(/data-experience-row/g)].length, 6);
   assert.doesNotMatch(html, /<form\b/);
