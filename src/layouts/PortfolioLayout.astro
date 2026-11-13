@@ -8,8 +8,11 @@ import transitionStyles from '../styles/transitions.css?raw';
 import Header from '../components/Header.astro';
 import Contact from '../components/Contact.astro';
 import Backdrop from '../components/Backdrop.astro';
-import { profile } from '../data/portfolio';
+import { contentFor } from '../i18n/content';
+import { localizedPath } from '../i18n/routes';
 import entryBootstrap from '../scripts/entry-bootstrap.js?raw';
+
+const { profile, locale, t } = contentFor(Astro.currentLocale);
 
 interface Props {
   title: string;
@@ -18,10 +21,10 @@ interface Props {
   transitionLabel?: string;
   schema?: Record<string, unknown>;
 }
-const { title, description, home = false, transitionLabel = 'Homepage', schema } = Astro.props;
+const { title, description, home = false, transitionLabel = t.homepage, schema } = Astro.props;
 ---
 <!doctype html>
-<html lang="en" transition:animate="none">
+<html lang={locale} transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -33,16 +36,26 @@ const { title, description, home = false, transitionLabel = 'Homepage', schema }
     <meta name="portfolio-transition-label" content={transitionLabel} />
     {home && <script is:inline set:html={entryBootstrap} />}
     <title>{title}</title>
+    {Astro.site && <>
+      <link rel="canonical" href={new URL(localizedPath(locale, Astro.url.pathname), Astro.site)} />
+      {(['en', 'pl'] as const).map((language) => <link rel="alternate" hreflang={language} href={new URL(localizedPath(language, Astro.url.pathname), Astro.site)} />)}
+      <link rel="alternate" hreflang="x-default" href={new URL(localizedPath('en', Astro.url.pathname), Astro.site)} />
+      <meta property="og:url" content={new URL(localizedPath(locale, Astro.url.pathname), Astro.site)} />
+    </>}
+    <meta property="og:locale" content={locale === 'pl' ? 'pl_PL' : 'en_US'} />
+    <meta property="og:locale:alternate" content={locale === 'pl' ? 'en_US' : 'pl_PL'} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta property="og:type" content={home ? 'website' : 'article'} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/og.png" />
+    <meta property="og:image" content={Astro.site ? new URL("/og.png", Astro.site).href : "/og.png"} />
     <meta property="og:image:alt" content={`${profile.name} — Full-stack developer`} />
     <meta name="twitter:card" content="summary_large_image" />
     {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
   </head>
-  <body data-page={home ? 'home' : 'case-study'}>
+  <body data-page={home ? 'home' : 'case-study'} data-section-labels={JSON.stringify({
+    '#work': t.allProjects, '#about': t.about, '#stack': t.stack, '#experience': t.experience, '#contact': t.contact,
+  })}>
     <Backdrop />
     <div class="route-overlay" data-route-overlay aria-hidden="true" transition:persist="route-overlay">
       <div class="route-curtain" data-route-curtain></div>

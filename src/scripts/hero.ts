@@ -1,5 +1,5 @@
 import { gsap } from 'gsap';
-import { heroHeadlines } from '../data/portfolio';
+import type { HeroHeadline } from '../data/portfolio';
 import { createTypewriterController } from './typewriter-controller';
 
 declare global {
@@ -12,6 +12,13 @@ export function initializeHero(hero: HTMLElement): () => void {
   const slides = Array.from(hero.querySelectorAll<HTMLElement>('[data-hero-slide]'));
   const button = hero.querySelector<HTMLButtonElement>('[data-hero-pause]');
   if (!slides.length || !button) { window.__portfolioEntry?.finish(); return () => {}; }
+  // Read the current document after every Astro swap, including its fallback copy.
+  const heroHeadlines: HeroHeadline[] = slides.map((slide) => {
+    const lines = Array.from(slide.querySelectorAll<HTMLElement>('.hero-line-reserve'), (line) => line.textContent || '');
+    return { lines: [lines[0] || '', lines[1] || ''] };
+  });
+  const pauseLabel = button.dataset.pauseLabel || button.getAttribute('aria-label') || '';
+  const resumeLabel = button.dataset.resumeLabel || pauseLabel;
   const outputs = slides.map((slide) => Array.from(slide.querySelectorAll<HTMLElement>('[data-hero-text]')));
   const caret = document.createElement('span');
   caret.className = 'hero-caret';
@@ -77,7 +84,7 @@ export function initializeHero(hero: HTMLElement): () => void {
       const paused = !controller.state().userPaused;
       controller.setPaused(paused);
       button.setAttribute('aria-pressed', String(paused));
-      button.setAttribute('aria-label', paused ? 'Resume headline animation' : 'Pause headline animation');
+      button.setAttribute('aria-label', paused ? resumeLabel : pauseLabel);
       button.classList.toggle('is-paused', paused);
     };
     if (!failed) button.hidden = false;
@@ -96,7 +103,7 @@ export function initializeHero(hero: HTMLElement): () => void {
       document.removeEventListener('visibilitychange', visibility);
       button.classList.remove('is-paused');
       button.setAttribute('aria-pressed', 'false');
-      button.setAttribute('aria-label', 'Pause headline animation');
+      button.setAttribute('aria-label', pauseLabel);
       restore();
     };
   } catch (error) {

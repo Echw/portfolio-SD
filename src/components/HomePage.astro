@@ -1,0 +1,25 @@
+---
+import PortfolioLayout from '../layouts/PortfolioLayout.astro';
+import Hero from './Hero.astro';
+import Projects from './Projects.astro';
+import Experience from './Experience.astro';
+import About from './About.astro';
+import Stack from './Stack.astro';
+import { contentFor } from '../i18n/content';
+const { profile } = contentFor(Astro.currentLocale);
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  jobTitle: 'Senior Full-Stack Developer',
+  description: profile.description,
+  sameAs: [profile.linkedin],
+};
+---
+<PortfolioLayout home title={`${profile.name} — Full-Stack Developer · AI/LLM`} description={profile.description} schema={schema}>
+  <Hero />
+  <About />
+  <Stack />
+  <Experience />
+  <Projects />
+</PortfolioLayout>

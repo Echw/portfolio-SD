@@ -4,11 +4,15 @@ import type { TransitionBeforePreparationEvent, TransitionBeforeSwapEvent } from
 import { destroyPortfolio, initializePortfolio, pausePortfolioScroll, resumePortfolioScroll } from './motion';
 
 /** Resolve against the incoming document, never the persisted overlay's old text. */
-export function routeLabel(page: string, hash: string, title: string): string {
-  const sections: Record<string, string> = {
+export function routeLabel(
+  page: string,
+  hash: string,
+  title: string,
+  sections: Record<string, string> = {
     '#work': 'All projects', '#about': 'About', '#stack': 'Stack',
     '#experience': 'Experience', '#contact': 'Contact',
-  };
+  },
+): string {
   return page === 'home' ? sections[hash] || title : title;
 }
 
@@ -143,7 +147,11 @@ export function initializeRouteTransitions(): () => void {
     if (!session || session.event.signal !== event.signal) return;
     event.newDocument.documentElement.dataset.routeBusy = 'true';
     const title = event.newDocument.querySelector('meta[name="portfolio-transition-label"]')?.getAttribute('content') || 'Homepage';
-    session.label.textContent = routeLabel(event.newDocument.body.dataset.page || '', event.to.hash, title);
+    const sectionLabels = event.newDocument.body.dataset.sectionLabels;
+    session.label.textContent = routeLabel(
+      event.newDocument.body.dataset.page || '', event.to.hash, title,
+      sectionLabels ? JSON.parse(sectionLabels) : undefined,
+    );
   };
 
   const afterSwap = () => {

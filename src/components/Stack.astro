@@ -1,13 +1,15 @@
 ---
 import { stack } from '../data/portfolio';
+import { localeOf, ui } from '../i18n/ui';
 import StackIcon from './StackIcon.astro';
+const t = ui[localeOf(Astro.currentLocale)];
 ---
 <section id="stack" class="stack container section" aria-labelledby="stack-title">
   <div class="stack-heading" data-reveal>
-    <p class="eyebrow">Stack</p>
-    <h2 id="stack-title" class="stack-title">Tools I build with.</h2>
+    <p class="eyebrow">{t.stack}</p>
+    <h2 id="stack-title" class="stack-title">{t.toolsTitle}</h2>
   </div>
-  <ul class="stack-list" aria-label="Technologies and tools">
+  <ul class="stack-list" aria-label={t.toolsLabel}>
     {stack.map((tool) => (
       <li class="stack-card" data-glow-card>
         <div class="stack-surface glow-surface" data-glow-surface data-stack-tag>

@@ -63,9 +63,9 @@ function harness({ reduced = false, initialize = () => Promise.resolve() } = {})
   });
   const dispose = exports.initializeRouteTransitions();
   const emit = (name) => document.dispatchEvent(new Event(name));
-  function prepare({ to = '/work/goldnat/', page = 'case-study', title = 'Goldnat', type = 'push', loader = async () => {} } = {}) {
+  function prepare({ to = '/work/goldnat/', page = 'case-study', title = 'Goldnat', type = 'push', sectionLabels, loader = async () => {} } = {}) {
     const controller = new AbortController();
-    const newDocument = { documentElement: element(), body: { dataset: { page } },
+    const newDocument = { documentElement: element(), body: { dataset: { page, sectionLabels: sectionLabels && JSON.stringify(sectionLabels) } },
       querySelector: () => ({ getAttribute: () => title }),
     };
     const event = Object.assign(new Event('astro:before-preparation', { cancelable: true }), {
@@ -220,4 +220,18 @@ test('resize or reduced-motion changes settle cancelled animations and leave nav
     assert.equal(h.timelines.length, 1);
     assert.equal(h.main.inert, false); assert.equal(h.overlay['data-active'], undefined); h.dispose();
   }
+});
+
+test('the incoming Polish document supplies translated section labels to the persistent curtain', async () => {
+  const h = harness({ reduced: true });
+  const navigation = h.prepare({
+    to: '/pl/#work', page: 'home', title: 'Strona główna',
+    sectionLabels: { '#work': 'Wszystkie realizacje', '#about': 'O mnie' },
+  });
+  await navigation.loading;
+  navigation.swap();
+  await flush();
+  assert.equal(h.label.textContent, 'Wszystkie realizacje');
+  assert.equal(h.routeLabel('home', '#top', 'Strona główna', {}), 'Strona główna');
+  h.dispose();
 });

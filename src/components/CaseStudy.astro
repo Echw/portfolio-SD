@@ -3,7 +3,9 @@ import { Picture } from 'astro:assets';
 import PortfolioLayout from '../layouts/PortfolioLayout.astro';
 import CaseStudyFigure from './CaseStudyFigure.astro';
 import type { CaseStudy } from '../data/case-studies';
-import { profile } from '../data/portfolio';
+import { contentFor } from '../i18n/content';
+import { localizedPath } from '../i18n/routes';
+const { profile, locale, t } = contentFor(Astro.currentLocale);
 import '../styles/case-study.css';
 interface Props { study: CaseStudy }
 const { study } = Astro.props;
@@ -13,27 +15,27 @@ const schema = {
   name: `${study.title} — ${study.subtitle}`,
   description: study.description,
   author: { '@type': 'Person', name: profile.name },
-  inLanguage: 'en',
+  inLanguage: locale,
   about: { '@type': 'WebSite', name: study.title, url: study.url },
 };
 ---
-<PortfolioLayout title={`${study.title} — Case study · ${profile.name}`} description={study.description} transitionLabel={study.title} schema={schema}>
+<PortfolioLayout title={`${study.title} — ${t.caseStudy} · ${profile.name}`} description={study.description} transitionLabel={study.title} schema={schema}>
   <article class="case-study" aria-labelledby="case-title">
     <section id="top" class="case-hero container" aria-labelledby="case-title">
-      <a class="case-back text-link" href="/#work"><span aria-hidden="true">←</span> All projects</a>
+      <a class="case-back text-link" href={localizedPath(locale) + "#work"}><span aria-hidden="true">←</span> {t.allProjects}</a>
       <div class:list={['case-hero-heading', { 'case-hero-heading--multiline': study.titleLines }]}>
         <h1 id="case-title">{study.titleLines ? study.titleLines.map((line, index) => <>{index > 0 && ' '}<span class="case-title-line">{line}</span></>) : study.title}</h1>
         <div class="case-hero-summary">
           <p>{study.subtitle}</p>
-          <a class="text-link" href={study.url} target="_blank" rel="noopener noreferrer">Visit live website <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+          <a class="text-link" href={study.url} target="_blank" rel="noopener noreferrer">{t.visitLive} <span aria-hidden="true">↗</span><span class="sr-only">{t.newTab}</span></a>
         </div>
       </div>
       <div class="case-cover" style={study.coverPosition ? { '--case-cover-position': study.coverPosition } : undefined}>
         <Picture src={study.cover} formats={['avif']} fallbackFormat="webp" widths={[640, 960, 1440, 1920]} sizes="(min-width: 1680px) 1512px, 90vw" alt={study.coverAlt} loading="eager" fetchpriority="high" decoding="async" />
       </div>
       <div class="case-hero-foot">
-        <span>Independent work</span>
-        <a class="text-link" href={`#${study.sections[0].id}`}>Explore the project <span aria-hidden="true">↓</span></a>
+        <span>{t.independentWork}</span>
+        <a class="text-link" href={`#${study.sections[0].id}`}>{t.exploreProject} <span aria-hidden="true">↓</span></a>
       </div>
     </section>
     {study.sections.map((section, sectionIndex) => (
@@ -44,7 +46,7 @@ const schema = {
         </div>
         {sectionIndex === 0 && (
           <div class="case-contribution" data-reveal>
-            <h3>My contribution</h3>
+            <h3>{t.contribution}</h3>
             <ul>{study.contributions.map((contribution) => <li>{contribution}</li>)}</ul>
           </div>
         )}
@@ -52,12 +54,12 @@ const schema = {
         {sectionIndex === study.sections.length - 1 && (
           <>
             <div class="case-technologies" data-reveal>
-              <h3>Selected technologies</h3>
+              <h3>{t.technologies}</h3>
               <ul>{study.technologies.map((technology) => <li>{technology}</li>)}</ul>
             </div>
             <div class="case-end-links" data-reveal>
-              <a class="text-link" href="/#work"><span aria-hidden="true">←</span> Back to independent work</a>
-              <a class="text-link" href={study.url} target="_blank" rel="noopener noreferrer">Visit {study.title} <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+              <a class="text-link" href={localizedPath(locale) + "#work"}><span aria-hidden="true">←</span> {t.backWork}</a>
+              <a class="text-link" href={study.url} target="_blank" rel="noopener noreferrer">{t.visit} {study.title} <span aria-hidden="true">↗</span><span class="sr-only">{t.newTab}</span></a>
             </div>
           </>
         )}

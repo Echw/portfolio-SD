@@ -1,24 +1,4 @@
 ---
-import PortfolioLayout from '../layouts/PortfolioLayout.astro';
-import Hero from '../components/Hero.astro';
-import Projects from '../components/Projects.astro';
-import Experience from '../components/Experience.astro';
-import About from '../components/About.astro';
-import Stack from '../components/Stack.astro';
-import { profile } from '../data/portfolio';
-const schema = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: profile.name,
-  jobTitle: 'Senior Full-Stack Developer',
-  description: profile.description,
-  sameAs: [profile.linkedin],
-};
+import HomePage from '../components/HomePage.astro';
 ---
-<PortfolioLayout home title={`${profile.name} — Full-Stack Developer · AI/LLM`} description={profile.description} schema={schema}>
-  <Hero />
-  <About />
-  <Stack />
-  <Experience />
-  <Projects />
-</PortfolioLayout>
+<HomePage />

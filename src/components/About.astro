@@ -1,5 +1,6 @@
 ---
-import { profile } from '../data/portfolio';
+import { contentFor } from '../i18n/content';
+const { profile, t } = contentFor(Astro.currentLocale);
 const parts = [
   ...profile.about.start.split(' ').map((word) => ({ word, accent: false })),
   ...profile.about.highlight.split(' ').map((word) => ({ word, accent: true })),
@@ -8,7 +9,7 @@ const parts = [
 const accessibleText = profile.about.start + ' ' + profile.about.highlight + ' ' + profile.about.end;
 ---
 <section id="about" class="about container section" aria-labelledby="about-title">
-  <h2 id="about-title" class="eyebrow">About</h2>
+  <h2 id="about-title" class="eyebrow">{t.about}</h2>
   <p class="sr-only">{accessibleText}</p>
   <p class="about-intro" aria-hidden="true" data-about-copy>
     {parts.map(({ word, accent }) => <><span class:list={['about-word', { 'about-word--accent': accent }]} data-about-word>{word}</span>{' '}</>)}

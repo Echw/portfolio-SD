@@ -1,18 +1,21 @@
 ---
-import { experience, experienceHref } from '../data/experience';
+import { contentFor } from '../i18n/content';
+import { experienceHref } from '../data/experience';
+import { localizedPath } from '../i18n/routes';
+const { experience, locale, t } = contentFor(Astro.currentLocale);
 ---
 <section id="experience" class="experience container section" aria-labelledby="experience-title">
   <div class="section-heading">
-    <h2 id="experience-title" class="section-title" data-reveal>Worked with.</h2>
+    <h2 id="experience-title" class="section-title" data-reveal>{t.workedWith}</h2>
     <span class="section-count" aria-hidden="true">({String(experience.length).padStart(2, '0')})</span>
   </div>
-  <ol class="experience-list" aria-label="Professional experience">
+  <ol class="experience-list" aria-label={t.professionalExperience}>
     {experience.map((item) => (
       <li>
-        <a class="experience-row" data-experience-row href={experienceHref(item.id)}>
+        <a class="experience-row" data-experience-row href={localizedPath(locale, experienceHref(item.id))}>
           <h3 class="experience-company">{item.company}<span class="experience-arrow" aria-hidden="true">↗</span></h3>
           <div class="experience-detail">
-            <p class="experience-role">{item.role}{item.arrangement && ' · Part-time'}</p>
+            <p class="experience-role">{item.role}{item.arrangement && ' · ' + t.partTime}</p>
             {item.summary && <p class="experience-summary">{item.summary}</p>}
           </div>
           <p class="experience-period">{item.period}</p>

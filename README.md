@@ -255,3 +255,35 @@ Przeglądarka — scenariusze do faktycznego sprawdzenia:
 - About, Stack i footer: płynność, czytelność, kadry i kolejność efektów;
 - przełączenie reduced motion podczas oglądania, bez JS i z uszkodzonym zdjęciem;
 - przycisk Wstecz / Dalej i zachowanie pozycji po powrocie do strony.
+
+
+## Wersje językowe
+
+Astro generuje 18 statycznych stron: 9 angielskich pod dotychczasowymi adresami
+i 9 polskich pod `/pl/`. Konfiguracja i18n pozostawia `en` jako język domyślny
+bez prefiksu. Przełącznik PL / EN w nagłówku prowadzi do odpowiednika aktualnej
+strony; z JavaScript zachowuje także kotwicę. Język wynika z adresu URL,
+bez automatycznych przekierowań, ciasteczek i zapisywania preferencji.
+
+Szablony i komponenty są wspólne. `src/i18n/ui.ts` zawiera typowany słownik
+interfejsu, `src/i18n/content.ts` wybiera treści według `Astro.currentLocale`,
+a `src/i18n/routes.ts` tworzy adresy przez `astro:i18n`.
+Polskie opisy znajdują się w `src/data/pl/`. Dane strukturalne, identyfikatory,
+nazwy firm i technologii, obrazy oraz adresy zewnętrzne są współdzielone z EN.
+Nowy projekt wymaga także wpisu w polskim `projectCopy`; brak tłumaczenia
+zatrzymuje build. Analogicznie należy uzupełniać opisy doświadczenia i realizacji.
+Testy sprawdzają kompletność tłumaczeń i zgodność ich struktury.
+
+Animowany nagłówek odczytuje tekst i etykiety przycisku z aktualnego HTML.
+Przejścia pobierają etykiety sekcji ze strony docelowej, również przy zmianie języka.
+Pełne słowniki i opisy pozostają po stronie generowania statycznego HTML.
+
+Po ustawieniu produkcyjnego `site` w `astro.config.mjs` layout generuje canonical,
+wzajemne `hreflang=en/pl`, `x-default` dla EN oraz bezwzględne adresy Open Graph.
+Bez domeny nie emituje fikcyjnych adresów canonical/hreflang.
+
+`npm.cmd test` obejmuje oba języki. `npm.cmd run test:projects` tymczasowo dodaje
+trzeci projekt i jego polskie tłumaczenie, sprawdza obie strony główne, a następnie
+odtwarza oba pliki i standardowy build. Podczas tego testu nie edytuj tych plików.
+
+Dwa przeglądy językowe i wyniki kontroli: [QA-i18n.md](QA-i18n.md).

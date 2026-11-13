@@ -1,7 +1,9 @@
 ---
 import PortfolioLayout from '../layouts/PortfolioLayout.astro';
 import type { Experience } from '../data/experience';
-import { profile } from '../data/portfolio';
+import { contentFor } from '../i18n/content';
+import { localizedPath } from '../i18n/routes';
+const { profile, locale, t } = contentFor(Astro.currentLocale);
 import '../styles/case-study.css';
 import '../styles/experience-detail.css';
 
@@ -10,18 +12,18 @@ const { experience: entry } = Astro.props;
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
-  name: `${entry.company} — Professional experience · ${profile.name}`,
+  name: `${entry.company} — ${t.professionalExperience} · ${profile.name}`,
   description: entry.description,
-  inLanguage: 'en',
+  inLanguage: locale,
   author: { '@type': 'Person', name: profile.name },
   about: { '@type': 'Organization', name: entry.company },
 };
 ---
-<PortfolioLayout title={`${entry.company} — Professional experience · ${profile.name}`} description={entry.description} transitionLabel={entry.company} schema={schema}>
+<PortfolioLayout title={`${entry.company} — ${t.professionalExperience} · ${profile.name}`} description={entry.description} transitionLabel={entry.company} schema={schema}>
   <article class="case-study experience-detail" aria-labelledby="experience-detail-title">
     <header id="top" class="experience-hero container">
-      <a class="case-back text-link" href="/#experience"><span aria-hidden="true">←</span> Back to experience</a>
-      <p class="eyebrow">Professional experience</p>
+      <a class="case-back text-link" href={localizedPath(locale) + "#experience"}><span aria-hidden="true">←</span> {t.backExperience}</a>
+      <p class="eyebrow">{t.professionalExperience}</p>
       <h1 id="experience-detail-title">{entry.company}</h1>
       <div class="experience-meta" data-reveal>
         <p class="experience-detail-role">{entry.role}</p>
@@ -33,14 +35,14 @@ const schema = {
     </header>
     <section class="experience-section container" aria-labelledby="role-title">
       <div class="case-section-copy" data-reveal>
-        <h2 id="role-title">The role</h2>
+        <h2 id="role-title">{t.role}</h2>
         <div class="case-prose"><p>{entry.overview}</p></div>
       </div>
     </section>
     {entry.contributions?.length && (
       <section class="experience-section container" aria-labelledby="contribution-title">
         <div class="case-section-copy" data-reveal>
-          <h2 id="contribution-title">My contribution</h2>
+          <h2 id="contribution-title">{t.contribution}</h2>
           <ul class="case-prose experience-contributions">{entry.contributions.map((item) => <li>{item}</li>)}</ul>
         </div>
       </section>
@@ -53,9 +55,9 @@ const schema = {
             <p class="experience-project-context">{project.context}</p>
             {project.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
             <div class="experience-references">
-              <h3>{project.references.length === 1 ? 'Public reference' : 'Public references'}</h3>
+              <h3>{project.references.length === 1 ? t.reference : t.references}</h3>
               <ul>{project.references.map((reference) => (
-                <li><a class="text-link" href={reference.url} target="_blank" rel="noopener noreferrer">{reference.label} <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a></li>
+                <li><a class="text-link" href={reference.url} target="_blank" rel="noopener noreferrer">{reference.label} <span aria-hidden="true">↗</span><span class="sr-only">{t.newTab}</span></a></li>
               ))}</ul>
             </div>
           </div>
@@ -65,14 +67,14 @@ const schema = {
     <section class="experience-section container" aria-labelledby="technologies-title">
       <div class="case-technologies" data-reveal>
         <div>
-          <h2 id="technologies-title">Selected technologies</h2>
-          <p class="experience-technology-note">Across the role</p>
+          <h2 id="technologies-title">{t.technologies}</h2>
+          <p class="experience-technology-note">{t.acrossRole}</p>
         </div>
         <ul>{entry.technologies.map((technology) => <li>{technology}</li>)}</ul>
       </div>
     </section>
     <div class="experience-end container" data-reveal>
-      <a class="text-link" href="/#experience"><span aria-hidden="true">←</span> Back to experience</a>
+      <a class="text-link" href={localizedPath(locale) + "#experience"}><span aria-hidden="true">←</span> {t.backExperience}</a>
     </div>
   </article>
 </PortfolioLayout>

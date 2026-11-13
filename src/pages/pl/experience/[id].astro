@@ -1,0 +1,8 @@
+---
+import ExperienceDetail from '../../../components/ExperienceDetail.astro';
+import { experience } from '../../../data/pl/experience';
+export function getStaticPaths() {
+  return experience.map((entry) => ({ params: { id: entry.id }, props: { experience: entry } }));
+}
+---
+<ExperienceDetail experience={Astro.props.experience} />
