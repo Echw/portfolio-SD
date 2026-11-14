@@ -54,7 +54,12 @@ for (const entry of experience) {
     assert.equal([...article.matchAll(/href="\/#experience"/g)].length, 2);
     assert.equal(copy.split('Back to experience').length - 1, 2);
     assert.match(copy, /Professional experience/);
-    assert.doesNotMatch(article, /<img\b|<picture\b|<figure\b|<svg\b|case-cover|placeholder|Independent work|Explore the project|Visit live website|Editorial notes/i);
+    assert.doesNotMatch(article, /<img\b|<picture\b|<figure\b|case-cover|placeholder|Independent work|Explore the project|Visit live website|Editorial notes/i);
+    for (const icon of article.matchAll(/<svg\b[^>]*>/g)) {
+      assert.match(icon[0], /class="arrow-icon"/);
+      assert.match(icon[0], /aria-hidden="true"/);
+      assert.match(icon[0], /focusable="false"/);
+    }
     assert.ok(html.includes(`<title>${entry.company} — Professional experience · Damian Stojaniuk</title>`));
     assert.ok(html.includes(`name="portfolio-transition-label" content="${entry.company}"`));
     assert.match(html, /name="description" content="[^"]+"/);

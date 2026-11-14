@@ -1,6 +1,7 @@
 ---
 import { contentFor } from '../i18n/content';
 import { localizedPath } from '../i18n/routes';
+import ArrowIcon from './ArrowIcon.astro';
 const { profile, locale, t } = contentFor(Astro.currentLocale);
 interface Props { home?: boolean }
 const { home = true } = Astro.props;
@@ -31,6 +32,6 @@ const navigation = [
   </div>
   <div class="footer-bottom">
     <p>© {new Date().getFullYear()} {profile.name}</p>
-    <a class="text-link arrow-link" href="#top">{t.backTop} <span aria-hidden="true">↑</span></a>
+    <a class="text-link arrow-link" href="#top">{t.backTop} <ArrowIcon direction="up" /></a>
   </div>
 </footer>

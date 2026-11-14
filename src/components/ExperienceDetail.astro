@@ -1,5 +1,6 @@
 ---
 import PortfolioLayout from '../layouts/PortfolioLayout.astro';
+import ArrowIcon from './ArrowIcon.astro';
 import type { Experience } from '../data/experience';
 import { contentFor } from '../i18n/content';
 import { localizedPath } from '../i18n/routes';
@@ -22,7 +23,7 @@ const schema = {
 <PortfolioLayout title={`${entry.company} — ${t.professionalExperience} · ${profile.name}`} description={entry.description} transitionLabel={entry.company} schema={schema}>
   <article class="case-study experience-detail" aria-labelledby="experience-detail-title">
     <header id="top" class="experience-hero container">
-      <a class="case-back text-link" href={localizedPath(locale) + "#experience"}><span aria-hidden="true">←</span> {t.backExperience}</a>
+      <a class="case-back text-link" href={localizedPath(locale) + "#experience"}><ArrowIcon direction="left" /> {t.backExperience}</a>
       <p class="eyebrow">{t.professionalExperience}</p>
       <h1 id="experience-detail-title">{entry.company}</h1>
       <div class="experience-meta" data-reveal>
@@ -57,7 +58,7 @@ const schema = {
             <div class="experience-references">
               <h3>{project.references.length === 1 ? t.reference : t.references}</h3>
               <ul>{project.references.map((reference) => (
-                <li><a class="text-link" href={reference.url} target="_blank" rel="noopener noreferrer">{reference.label} <span aria-hidden="true">↗</span><span class="sr-only">{t.newTab}</span></a></li>
+                <li><a class="text-link" href={reference.url} target="_blank" rel="noopener noreferrer">{reference.label} <ArrowIcon /><span class="sr-only">{t.newTab}</span></a></li>
               ))}</ul>
             </div>
           </div>
@@ -74,7 +75,7 @@ const schema = {
       </div>
     </section>
     <div class="experience-end container" data-reveal>
-      <a class="text-link" href={localizedPath(locale) + "#experience"}><span aria-hidden="true">←</span> {t.backExperience}</a>
+      <a class="text-link" href={localizedPath(locale) + "#experience"}><ArrowIcon direction="left" /> {t.backExperience}</a>
     </div>
   </article>
 </PortfolioLayout>

@@ -37,12 +37,12 @@
   .text-link::after { content: ''; position: absolute; inset: auto 0 -5px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform 180ms var(--ease-out); }
   .text-link:focus-visible::after { transform: scaleX(1); }
   .arrow-link { display: inline-flex; align-items: baseline; gap: .4em; }
-  .arrow-link span { transition: transform 180ms var(--ease-out); }
+  .arrow-link .arrow-icon { transition: transform 180ms var(--ease-out); }
   .skip-link { position: fixed; z-index: 100; inset: 12px auto auto 20px; padding: 10px 18px; background: var(--ink); color: var(--bg); transform: translateY(-180%); }
   .skip-link:focus { transform: none; }
   @media (hover: hover) and (pointer: fine) {
     .text-link:hover::after { transform: scaleX(1); }
-    .arrow-link:hover span { transform: translateY(-3px); }
+    .arrow-link:hover .arrow-icon { transform: translateY(-3px); }
   }
 }
 @layer components {
