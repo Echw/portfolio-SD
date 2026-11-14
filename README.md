@@ -38,7 +38,11 @@ Powrót przez przejście pomija intro hero i wejście kart; zmiana rozmiaru skra
 Przed wymianą strony sprzątane są GSAP, Lenis i listenery; po niej uruchamiają się ponownie.
 Wstecz/Dalej zachowuje pozycję scrolla, a lokalne kotwice nie nadpisują stanu historii.
 Scroll do kotwicy kończy się po 900 ms i zapisuje pozycję z zachowaniem indeksu Astro;
-`popstate` przerywa poprzedni ruch Lenis, aby nie nadpisał przywróconej pozycji.
+Wstecz/Dalej przerywa poprzedni ruch Lenis, aby nie nadpisał przywróconej pozycji.
+Syntetyczny `popstate` Astro podczas kliknięcia kotwicy w WebKit nie przerywa tego kliknięcia;
+po ustawieniu adresu pozycja Lenisa jest synchronizowana z ekranem. Najnowsze kliknięcie
+zastępuje poprzedni cel. Mijane podczas nawigacji karty odsłaniają się bez blokowania
+scrolla; ich pełna animacja z zatrzymaniem pozostaje przy ręcznym przewijaniu.
 Ograniczenie ruchu pomija animację. Błąd pobierania lub limit 10 sekund uruchamia zwykłą nawigację.
 Bez JavaScript działają standardowe linki. Weryfikacja wizualna silników jest opisana w QA-goldnat.md.
 Na podstronie nie uruchamiają się intro hero ani animacje wejścia kart strony głównej.

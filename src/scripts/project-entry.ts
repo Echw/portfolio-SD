@@ -60,6 +60,9 @@ export function initializeProjectEntry(root: HTMLElement, hold: (finish: () => v
           try {
             const section = card.closest<HTMLElement>('[data-project-section]');
             releaseScroll = hold(finish, section?.dataset.projectFit === 'true' ? section : card);
+            // Section navigation can finish this entrance synchronously instead
+            // of granting a scroll hold. Never restart its killed timeline.
+            if (card.dataset.projectReady === 'true') return;
             // Measure at trigger time, not initialization: the starting edge is below the viewport.
             const belowViewport = Math.max(64, window.innerHeight - card.getBoundingClientRect().top + 24);
             gsap.set(arrival, { y: belowViewport });

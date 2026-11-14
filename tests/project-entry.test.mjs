@@ -9,7 +9,7 @@ const source = ts.transpileModule(readFileSync(new URL('../src/scripts/project-e
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
 
-function harness({ width = 1440, failTrigger = false, count = 2, fit = width >= 1024 && count === 2 } = {}) {
+function harness({ width = 1440, failTrigger = false, count = 2, fit = width >= 1024 && count === 2, navigating = false } = {}) {
   const timelines = [], triggers = [], sets = [], errors = [], holders = new Set();
   const section = { dataset: { projectFit: String(fit) } }, framed = [];
   const cards = Array.from({ length: count }, () => {
@@ -49,9 +49,22 @@ function harness({ width = 1440, failTrigger = false, count = 2, fit = width >= 
     console: { error: (...values) => errors.push(values) },
   });
   const root = { querySelectorAll: () => cards };
-  const hold = (finish, target) => { holders.add(finish); framed.push(target); return () => holders.delete(finish); };
+  const hold = (finish, target) => {
+    if (navigating) { finish(); return () => {}; }
+    holders.add(finish); framed.push(target); return () => holders.delete(finish);
+  };
   return { cards, timelines, triggers, sets, errors, holders, section, framed, window, initialize: () => exports.initializeProjectEntry(root, hold) };
 }
+
+test('a card crossed during section navigation stays revealed without restarting its entrance', () => {
+  const h = harness({ navigating: true }); const cleanup = h.initialize();
+  h.triggers.forEach(({ options }) => options.onEnter());
+  assert.ok(h.cards.every((card) => card.dataset.projectReady === 'true'));
+  assert.ok(h.timelines.every((timeline) => timeline.killed && timeline.plays === 0));
+  assert.equal(h.holders.size, 0);
+  assert.equal(h.framed.length, 0);
+  cleanup();
+});
 
 test('a route arrival finishes pending card entrances and releases their scroll hold', () => {
   const h = harness();

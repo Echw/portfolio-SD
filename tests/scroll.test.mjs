@@ -9,36 +9,41 @@ const source = ts.transpileModule(readFileSync(new URL('../src/scripts/scroll.ts
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
 
-function harness({ router = false } = {}) {
+function harness({ router = false, safari = false, deferNavigation = false, deferScroll = false, smooth = true, onUpdate = () => {} } = {}) {
   const windowEvents = new Map(), documentEvents = new Map(), classes = new Set(), jobs = new Map();
   const events = (listeners) => ({ addEventListener: (name, callback) => listeners.set(name, callback), removeEventListener: (name) => listeners.delete(name) });
   const calls = [], navigations = [], historyWrites = []; let lenis;
   const location = { hash: '' };
   const history = { state: { index: 7, scrollY: 250 }, pushState(...args) { historyWrites.push(args); },
     replaceState(state) { this.state = state; } };
-  const target = { getBoundingClientRect: () => ({ top: 600 }), hasAttribute: () => true, focus() {}, addEventListener() {} };
+  let focused = 0;
+  const target = { getBoundingClientRect: () => ({ top: 850 - window.scrollY }), hasAttribute: () => true, focus() { focused++; }, addEventListener() {} };
   class Element {
     closest() { return this; }
     getAttribute() { return '#about'; }
   }
   const link = new Element();
   class Lenis {
-    actualScroll = 250; stops = 0; starts = 0; stopped = false; failScroll = false;
+    actualScroll = 250; targetScroll = 250; stops = 0; starts = 0; stopped = false; failScroll = false;
     constructor() { lenis = this; }
     on() {} off() {} raf() {} destroy() {}
-    stop() { this.stops++; this.stopped = true; }
-    start() { this.starts++; this.stopped = false; }
+    stop() { this.stops++; this.stopped = true; this.targetScroll = window.scrollY; }
+    start() { this.starts++; this.stopped = false; this.targetScroll = window.scrollY; }
     scrollTo(top, options) {
       if (this.failScroll) throw Error('Framing unavailable');
       calls.push({ top, options, stopped: this.stopped });
-      if (options.onComplete) window.scrollY = top;
-      options.onComplete?.();
+      if (safari && top === this.targetScroll) { options.onComplete?.(); return; }
+      this.targetScroll = top;
+      if (!deferScroll || options.immediate) {
+        if (options.onComplete) window.scrollY = top;
+        options.onComplete?.();
+      }
     }
   }
   const window = {
     ...events(windowEvents), scrollY: 250,
     setTimeout(callback, delay) { jobs.set(1, { callback, delay }); return 1; },
-    clearTimeout: (key) => jobs.delete(key), scrollTo() {},
+    clearTimeout: (key) => jobs.delete(key), scrollTo(_x, y) { this.scrollY = y; },
   };
   const document = { ...events(documentEvents), hidden: false,
     querySelector: () => router ? {} : null, getElementById: () => target,
@@ -50,17 +55,91 @@ function harness({ router = false } = {}) {
     require(name) {
       if (name === 'lenis') return { __esModule: true, default: Lenis };
       if (name === 'gsap') return { gsap: { ticker: { lagSmoothing() {}, add() {}, remove() {} } } };
-      if (name === 'gsap/ScrollTrigger') return { ScrollTrigger: { update() {} } };
+      if (name === 'gsap/ScrollTrigger') return { ScrollTrigger: { update: onUpdate } };
       if (name === './scroll-hold') return { createScrollHold };
       if (name === 'astro:transitions/client') return { navigate(hash, options) {
-        navigations.push({ hash, options }); location.hash = hash; return Promise.resolve();
+        const navigation = { hash, options };
+        navigations.push(navigation); location.hash = hash;
+        if (safari) {
+          window.scrollY = 722;
+          lenis.actualScroll = 722;
+          lenis.targetScroll = 722;
+          windowEvents.get('popstate')();
+        }
+        return deferNavigation ? new Promise((resolve) => { navigation.resolve = resolve; }) : Promise.resolve();
       } };
       return {};
     },
   });
-  const scroll = exports.initializeScroll({ offsetHeight: 112 }, true);
-  return { scroll, lenis, calls, classes, jobs, windowEvents, documentEvents, document, navigations, historyWrites, history, link };
+  const scroll = exports.initializeScroll({ offsetHeight: 112 }, smooth);
+  return { scroll, lenis, calls, classes, jobs, windowEvents, documentEvents, document, navigations, historyWrites, history, link, window, target, focused: () => focused };
 }
+
+const click = (h) => h.documentEvents.get('click')({ target: h.link, button: 0, detail: 1, preventDefault() {} });
+
+test('WebKit fragment popstate cannot leave Lenis at a stale target after the screen is restored', async () => {
+  const h = harness({ router: true, safari: true });
+  click(h);
+  await Promise.resolve();
+  assert.equal(h.window.scrollY, 722);
+  assert.equal(h.focused(), 1);
+  assert.equal(h.history.state.scrollY, 722);
+  assert.equal(h.navigations.length, 1);
+  h.scroll.destroy();
+});
+
+test('only the latest anchor can move or focus after delayed router completion', async () => {
+  const h = harness({ router: true, deferNavigation: true });
+  click(h); click(h);
+  h.navigations[1].resolve(); await Promise.resolve();
+  h.navigations[0].resolve(); await Promise.resolve();
+  assert.equal(h.calls.length, 1);
+  assert.equal(h.focused(), 1);
+  click(h);
+  h.windowEvents.get('popstate')();
+  const count = h.calls.length;
+  h.navigations[2].resolve(); await Promise.resolve();
+  assert.equal(h.calls.length, count, 'Back cancels a pending anchor');
+  h.scroll.destroy();
+});
+
+test('cards crossed by an anchor finish without stopping or reframing navigation', () => {
+  const h = harness({ deferScroll: true }); let finished = 0;
+  h.scroll.goTo(h.target, false, true);
+  const arrival = h.calls.at(-1);
+  h.windowEvents.get('resize')();
+  h.scroll.hold(() => finished++, h.target);
+  assert.equal(finished, 1);
+  assert.equal(h.lenis.stopped, false);
+  assert.equal(h.classes.size, 0);
+  assert.equal(h.calls.length, 1);
+  arrival.options.onComplete();
+  const release = h.scroll.hold(() => finished++);
+  assert.equal(h.lenis.stopped, true, 'Manual scrolling still gets entrance holds');
+  release(); h.scroll.destroy();
+});
+
+test('native immediate anchors resolve newly entered cards before giving up scroll ownership', () => {
+  let h, finished = 0;
+  h = harness({ smooth: false, onUpdate: () => h.scroll.hold(() => finished++, h.target) });
+  h.scroll.goTo(h.target, true, true);
+  assert.equal(h.window.scrollY, 722);
+  assert.equal(finished, 1);
+  assert.equal(h.classes.size, 0);
+  assert.equal(h.focused(), 1);
+  h.scroll.destroy();
+});
+
+test('an interrupted scroll cannot apply stale focus or history on completion', () => {
+  const h = harness({ deferScroll: true });
+  h.scroll.goTo(h.target, false, true);
+  const arrival = h.calls.at(-1);
+  h.windowEvents.get('wheel')({ ctrlKey: false });
+  arrival.options.onComplete();
+  assert.equal(h.focused(), 0);
+  assert.equal(h.history.state.scrollY, 250);
+  h.scroll.destroy();
+});
 
 test('local anchors use Astro history once and retain smooth scrolling without a document transition', async () => {
   const h = harness({ router: true }); let prevented = 0;

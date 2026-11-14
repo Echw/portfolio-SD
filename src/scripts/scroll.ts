@@ -8,6 +8,9 @@ import { navigate } from 'astro:transitions/client';
 /** Single scroll owner. Native keyboard/touch behavior remains available. */
 export function initializeScroll(header: HTMLElement, smooth: boolean) {
   let destroyed = false;
+  let navigationId = 0;
+  let navigating = false;
+  let updatingAnchorHistory = false;
   const lenis = smooth ? new Lenis({ lerp: .1, smoothWheel: true, syncTouch: false, autoRaf: false, anchors: false }) : undefined;
   const tick = (time: number) => lenis?.raf(time * 1000);
   if (lenis) {
@@ -27,10 +30,26 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
     schedule: (callback, delay) => window.setTimeout(callback, delay),
     cancel: (timer) => window.clearTimeout(timer as number),
   });
-  const goTo = (target: HTMLElement, immediate = false, focus = false) => {
+  const cancelNavigation = () => { navigationId++; navigating = false; };
+  const beginNavigation = () => {
+    const id = ++navigationId;
+    navigating = true;
     holds.interrupt();
+    // Reset even when Lenis thinks its target already equals the actual position.
+    // Safari's fragment navigation can update that target before our click finishes.
+    lenis?.stop();
+    lenis?.start();
+    return id;
+  };
+  const moveTo = (target: HTMLElement, id: number, immediate: boolean, focus: boolean) => {
+    if (destroyed || id !== navigationId) return;
     const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - header.offsetHeight - 16);
     const finish = () => {
+      if (destroyed || id !== navigationId) return;
+      // Resolve newly crossed cards while navigation still owns the scroll,
+      // including immediate jumps which finish before a native scroll event.
+      ScrollTrigger.update();
+      navigating = false;
       if (!focus) return;
       // Lenis may finish between native scrollend events. Preserve Astro's index
       // while recording the final anchor position for Back/Forward navigation.
@@ -48,6 +67,9 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
     if (lenis) lenis.scrollTo(top, { immediate, duration: .9, lerp: 0, onComplete: finish });
     else { window.scrollTo(0, top); finish(); }
   };
+  const goTo = (target: HTMLElement, immediate = false, focus = false) => {
+    if (!destroyed) moveTo(target, beginNavigation(), immediate, focus);
+  };
   const click = (event: MouseEvent) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const anchor = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href^="#"]') : null;
@@ -55,16 +77,28 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
     const target = hash ? document.getElementById(hash.slice(1)) : null;
     if (!target) return;
     event.preventDefault();
+    const id = beginNavigation();
     // Astro keeps its own history index and saved positions. Never replace them with null.
     if (document.querySelector('meta[name="astro-view-transitions-enabled"]')) {
       const top = window.scrollY;
-      const moving = navigate(hash!, { sourceElement: anchor! });
-      // The router updates the fragment synchronously; Lenis owns the visible movement.
+      // Astro may synchronously dispatch popstate for a fragment in WebKit.
+      // That is part of this click, not a Back/Forward interruption.
+      updatingAnchorHistory = true;
+      let moving: Promise<void>;
+      try { moving = navigate(hash!, { sourceElement: anchor! }); }
+      finally { updatingAnchorHistory = false; }
       window.scrollTo(0, top);
-      void moving.then(() => { if (!destroyed) goTo(target, event.detail === 0 || !smooth, true); });
+      lenis?.stop();
+      lenis?.start();
+      void moving.then(() => moveTo(target, id, event.detail === 0 || !smooth, true))
+        .catch(() => {
+          if (!destroyed && id === navigationId) {
+            moveTo(target, id, true, true);
+          }
+        });
     } else {
       if (location.hash !== hash) history.pushState(history.state, '', hash);
-      goTo(target, event.detail === 0 || !smooth, true);
+      moveTo(target, id, event.detail === 0 || !smooth, true);
     }
   };
   const key = (event: KeyboardEvent) => {
@@ -76,19 +110,26 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
       }
     }
     if (lenis && ['Tab', 'Escape', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) {
+      cancelNavigation();
       lenis.scrollTo(lenis.actualScroll, { immediate: true });
     }
   };
   const preventScroll = (event: WheelEvent | TouchEvent) => {
+    if (!event.ctrlKey && (!('touches' in event) || event.touches.length === 1)) cancelNavigation();
     if (!holds.active() || event.ctrlKey || ('touches' in event && event.touches.length > 1)) return;
     if (event.cancelable) event.preventDefault();
   };
+  // Mobile browser chrome can resize the viewport during a smooth scroll.
+  // Release entrance holds without handing an active anchor back to the cards.
   const interrupt = () => holds.interrupt();
   const restoreHistory = () => {
-    interrupt();
+    if (updatingAnchorHistory) return;
+    beginNavigation();
     // Astro restores the saved position first. Stop any in-flight anchor tween
     // so its next frame cannot overwrite that restored position.
     lenis?.scrollTo(lenis.actualScroll, { immediate: true });
+    ScrollTrigger.update();
+    navigating = false;
   };
   const visibility = () => { if (document.hidden) interrupt(); };
   document.addEventListener('click', click, true);
@@ -100,9 +141,13 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
   window.addEventListener('popstate', restoreHistory);
   return {
     goTo,
-    pause() { holds.interrupt(); lenis?.stop(); },
+    pause() { cancelNavigation(); interrupt(); lenis?.stop(); },
     resume() { if (!destroyed && !holds.active()) lenis?.start(); },
     hold(finish: () => void, section?: HTMLElement | null) {
+      if (navigating || destroyed) {
+        finish();
+        return () => {};
+      }
       const alreadyHeld = holds.active();
       const release = holds.acquire(finish);
       try {
@@ -118,6 +163,7 @@ export function initializeScroll(header: HTMLElement, smooth: boolean) {
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      cancelNavigation();
       holds.destroy();
       document.removeEventListener('click', click, true);
       document.removeEventListener('visibilitychange', visibility);
