@@ -152,7 +152,7 @@
   .experience-role { font: 560 clamp(19px, 1.75vw, 27px)/1.4 var(--font-display); letter-spacing: -.02em; }
   .experience-summary { margin-top: 6px; font-size: 19px; }
   .experience-period { color: var(--muted); font-size: 19px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .experience-arrow { flex: none; color: var(--muted); font-size: .6em; }
+  .experience-arrow { flex: none; width: .6em; height: .6em; color: var(--muted); }
   .experience-row:focus-visible .experience-company, .experience-row:active .experience-company { color: var(--accent); }
   .experience-row:focus-visible::after { transform: scaleX(1); }
 
